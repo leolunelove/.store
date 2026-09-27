@@ -1,8 +1,4 @@
-const PRODUCTS = [
-  { id: "after-the-rain", title: "After the Rain", year: "2026", image: "downloads/after-the-rain.svg" },
-  { id: "lunar-tide", title: "Lunar Tide", year: "2026", image: "downloads/lunar-tide.svg" },
-  { id: "quiet-hours", title: "Quiet Hours", year: "2026", image: "downloads/quiet-hours.svg" }
-];
+import { PRODUCTS } from "./catalog.js?v=5";
 
 const apiBaseUrl = String(window.LEO_LUNE_CONFIG?.apiBaseUrl || "").replace(/\/$/, "");
 const dialog = document.querySelector("#purchase-dialog");
@@ -16,12 +12,40 @@ let selectedProduct = null;
 let selectedAmount = 0;
 
 document.querySelector("#year").textContent = new Date().getFullYear();
-document.querySelector("#art-grid").innerHTML = PRODUCTS.map((product, index) => `
-  <button class="art-card" type="button" data-product="${product.id}" aria-label="Download ${product.title}">
-    <span class="art-frame"><img src="${product.image}" alt="${product.title}, digital artwork" /></span>
-    <span class="art-meta"><strong>${product.title}</strong><span>0${index + 1} · ${product.year}</span></span>
-  </button>
-`).join("");
+let saved;
+try { saved = new Set(JSON.parse(localStorage.getItem("leo-lune-saved") || "[]")); } catch { saved = new Set(); }
+let filter = "all", orientation = "all", savedOnly = false;
+const editions = PRODUCTS.map(p => ({...p, type: "digital", key: `${p.id}-digital`}));
+function renderCollection() {
+  let visible = editions.filter(p => (filter === "all" || p.type === filter) && (orientation === "all" || p.orientation === orientation) && (!savedOnly || saved.has(p.key)) && p.title.toLowerCase().includes(document.querySelector("#search").value.trim().toLowerCase()));
+  if (document.querySelector("#sort").value === "title") visible.sort((a,b) => a.title.localeCompare(b.title));
+  document.querySelector("#collection-heading").innerHTML = `${savedOnly ? "Saved work" : filter === "framed" ? "Framed editions · coming soon" : filter === "digital" ? "Digital downloads" : "All work"} <span>${String(visible.length).padStart(2,"0")}</span>`;
+  document.querySelector("#saved-count").textContent = String(editions.filter(p => saved.has(p.key)).length).padStart(2,"0");
+  document.querySelector("#empty-state").hidden = visible.length > 0;
+  document.querySelector("#empty-state").textContent = filter === "framed" ? "Framed editions are coming soon. Explore the digital collection in the meantime." : "No pieces here yet. Try another filter or save a piece with +.";
+  document.querySelector("#art-grid").innerHTML = visible.map(p => `
+    <article class="art-card">
+      <button class="save-art" data-save="${p.key}" aria-label="${saved.has(p.key) ? "Unsave" : "Save"} ${p.title} ${p.type} edition" aria-pressed="${saved.has(p.key)}">${saved.has(p.key) ? "−" : "+"}</button>
+      <button class="art-open" data-product="${p.id}" data-type="${p.type}" aria-label="View ${p.title} ${p.type} edition">
+        <span class="art-stage ${p.type} ${p.orientation}"><span class="edition">${p.number} / digital</span><img src="${p.image}" alt="${p.title}, digital artwork" loading="lazy" width="1080" height="1440"><span class="art-type">▣ &nbsp; DIGITAL DOWNLOAD</span></span>
+        <span class="art-meta"><span><strong>${p.title}</strong><small>1080 × 1440 px · PNG</small></span><span class="price"><strong>From £0</strong><small>Pay what you want</small></span></span>
+      </button>
+    </article>`).join("");
+}
+renderCollection();
+document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
+  filter = button.dataset.filter;
+  document.querySelectorAll("[data-filter]").forEach(b => { b.classList.toggle("active",b === button); b.setAttribute("aria-pressed",String(b === button)); }); renderCollection();
+}));
+document.querySelector("#search").addEventListener("input",renderCollection);
+document.querySelector("#sort").addEventListener("change",renderCollection);
+document.querySelectorAll("[name=orientation]").forEach(input => input.addEventListener("change",() => {orientation = input.value; renderCollection();}));
+document.querySelector("#saved-toggle").addEventListener("click",event => {savedOnly = !savedOnly; event.currentTarget.setAttribute("aria-pressed",String(savedOnly)); renderCollection();});
+document.querySelectorAll("[data-columns]").forEach(button => button.addEventListener("click", () => {
+  document.querySelector("#art-grid").classList.toggle("two-columns",button.dataset.columns === "2");
+  document.querySelectorAll("[data-columns]").forEach(b => b.setAttribute("aria-pressed",String(b === button)));
+}));
+document.querySelector("#how-button").addEventListener("click",() => showToast("Choose a digital edition and select £0 to download free, or leave optional support. Framed editions are coming soon."));
 
 function showToast(message) {
   toast.textContent = message;
@@ -48,18 +72,31 @@ function updateButton() {
 function triggerDownload(path, title) {
   const link = document.createElement("a");
   link.href = path;
-  link.download = `${title.toLowerCase().replaceAll(" ", "-")}.svg`;
+  link.download = decodeURIComponent(path.split("/").pop());
   document.body.append(link);
   link.click();
   link.remove();
 }
 
 document.querySelector("#art-grid").addEventListener("click", (event) => {
-  const card = event.target.closest(".art-card");
+  const saveButton = event.target.closest("[data-save]");
+  if (saveButton) {
+    const key = saveButton.dataset.save;
+    saved.has(key) ? saved.delete(key) : saved.add(key);
+    try { localStorage.setItem("leo-lune-saved",JSON.stringify([...saved])); } catch {}
+    renderCollection(); return;
+  }
+  const card = event.target.closest(".art-open");
   if (!card) return;
   selectedProduct = PRODUCTS.find((product) => product.id === card.dataset.product);
   document.querySelector("#dialog-title").textContent = selectedProduct.title;
   document.querySelector("#dialog-art").style.backgroundImage = `url(${selectedProduct.image})`;
+  const isFramed = card.dataset.type === "framed";
+  document.querySelector("#dialog-type").textContent = isFramed ? "FRAMED EDITION · COMING SOON" : "DIGITAL DOWNLOAD";
+  document.querySelector("#dialog-note").textContent = isFramed ? "Frame mockup · sample edition" : "1080 × 1440 px · original PNG · personal use";
+  document.querySelector("#framed-note").hidden = !isFramed;
+  form.hidden = isFramed;
+  checkoutButton.disabled = false;
   form.reset();
   chooseAmount(0);
   dialog.showModal();
@@ -90,7 +127,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
   if (!apiBaseUrl) {
-    status.textContent = "Payments are not connected yet. Add the backend URL in config.js.";
+    status.textContent = "Paid support is coming soon. You can still choose £0 to download this piece for free.";
     return;
   }
 

@@ -5,54 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Leo Lune — original art and pay-what-you-want digital downloads." />
     <title>Leo Lune — Art & Editions</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Italiana&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=2" />
+    <link rel="stylesheet" href="gallery.css?v=5" />
   </head>
   <body>
     <header class="site-header">
-      <a class="wordmark" href="#top" aria-label="Leo Lune home">LEO LUNE</a>
+      <a class="wordmark" href="#top" aria-label="Leo Lune home"><span>//</span> leo lune.</a>
       <nav aria-label="Main navigation">
-        <a href="#work">Work</a>
-        <a href="#about">About</a>
+        <a href="#work">work</a><a class="current" href="#top">[ &nbsp;store&nbsp; ]</a><a href="#about">about</a>
       </nav>
+      <div class="header-actions"><button id="saved-toggle" aria-pressed="false">♧ &nbsp; saved <span id="saved-count">00</span></button><a href="https://www.leolune.com" target="_blank" rel="noopener">portfolio ↗</a></div>
     </header>
+    <aside class="sidebar" aria-label="Collection filters">
+      <p class="eyebrow">// THE STORE</p>
+      <div class="categories">
+        <button class="active" data-filter="all" aria-pressed="true"><span>All work <small>12</small></span><em>The full collection</em></button>
+        <button data-filter="framed" aria-pressed="false"><span>Framed editions <small>00</small></span><em>Coming soon.</em></button>
+        <button data-filter="digital" aria-pressed="false"><span>Digital downloads <small>12</small></span><em>Pay what you want, from £0</em></button>
+      </div>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find an artwork" aria-label="Find an artwork"></label>
+      <details class="orientation"><summary>Orientation <span>+</span></summary><div><label><input type="radio" name="orientation" value="all" checked> All</label><label><input type="radio" name="orientation" value="portrait"> Portrait</label><label><input type="radio" name="orientation" value="landscape"> Landscape</label></div></details>
+      <section class="sidebar-story" id="about"><h2>something for<br>your space.</h2><p>A file to make your own.<br>A framed piece to take home.<br>Two ways to live with the work.</p><button id="how-button">How it works &nbsp; ↗</button></section>
+      <p class="sidebar-footer">independent artist<br>Gibraltar / online</p>
+    </aside>
 
     <main id="top">
       <section class="hero">
-        <p class="eyebrow">ARTIST · GIBRALTAR</p>
-        <h1>Art for the<br /><em>quiet hours.</em></h1>
-        <p class="intro">Original works and digital editions, made slowly and shared openly. Download for free, or leave something if you’d like to support the work.</p>
-        <a class="text-link" href="#work">Explore the collection <span>↘</span></a>
+        <p class="eyebrow">// leo lune. / collected works</p>
+        <h1>art, in your hands.</h1>
+        <div class="hero-bottom"><p class="intro">Download something you love, or take home a framed piece.<br>Different ways to own the work. All in one place.</p><p class="hero-aside"><strong>digital &amp; physical.</strong><br>Pay what you want for files.<br>Framed editions coming soon.</p></div>
       </section>
 
       <section class="collection" id="work" aria-labelledby="collection-heading">
         <div class="section-heading">
-          <p class="eyebrow">DIGITAL EDITIONS · 01—03</p>
-          <h2 id="collection-heading">The collection</h2>
+          <h2 id="collection-heading">All work</h2>
+          <div class="view-controls"><select id="sort" aria-label="Sort artwork"><option value="curated">Curated order</option><option value="title">Title A–Z</option></select><button data-columns="3" aria-label="Three-column grid" aria-pressed="true">⊞</button><button data-columns="2" aria-label="Two-column grid" aria-pressed="false">▥</button></div>
         </div>
         <div class="art-grid" id="art-grid"></div>
       </section>
 
-      <section class="about" id="about">
-        <p class="eyebrow">ABOUT</p>
-        <p>Leo Lune is an independent art practice exploring memory, place and the forms we find in stillness.</p>
-      </section>
+      <p class="empty-state" id="empty-state" hidden>No pieces here yet. Try another filter or save a piece with +.</p>
     </main>
 
     <footer>
-      <span>© <span id="year"></span> Leo Lune</span>
-      <span>Made in Gibraltar</span>
+      <span><strong>THE DIGITAL COLLECTION</strong> &nbsp; / &nbsp; Original PNG downloads. From £0.</span><span>© <span id="year"></span> leo lune.</span>
     </footer>
 
     <dialog class="purchase-dialog" id="purchase-dialog" aria-labelledby="dialog-title">
       <button class="close-button" type="button" aria-label="Close">×</button>
       <div class="dialog-art" id="dialog-art"></div>
       <div class="dialog-content">
-        <p class="eyebrow">DIGITAL DOWNLOAD</p>
+        <p class="eyebrow" id="dialog-type">DIGITAL DOWNLOAD</p>
         <h2 id="dialog-title"></h2>
-        <p class="dialog-note">High-resolution artwork · personal use</p>
+        <p class="dialog-note" id="dialog-note">Original PNG artwork · personal use</p>
+        <p id="framed-note" hidden>Framed editions are coming soon. Find the free digital version of this piece in Digital downloads.</p>
         <form id="purchase-form">
           <fieldset>
             <legend>Pay what you want</legend>
@@ -77,6 +82,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="config.js"></script>
-    <script type="module" src="app.js?v=3"></script>
+    <script type="module" src="app.js?v=5"></script>
   </body>
 </html>
