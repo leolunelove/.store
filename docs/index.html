@@ -4,50 +4,48 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Leo Lune — original art and pay-what-you-want digital downloads." />
-    <title>Leo Lune — Art & Editions</title>
-    <link rel="stylesheet" href="gallery.css?v=5" />
+    <title>Leo Lune — Store</title>
+    <link rel="stylesheet" href="gallery.css?v=6" />
   </head>
   <body>
+    <div class="store-shell">
     <header class="site-header">
-      <a class="wordmark" href="#top" aria-label="Leo Lune home"><span>//</span> leo lune.</a>
-      <nav aria-label="Main navigation">
-        <a href="#work">work</a><a class="current" href="#top">[ &nbsp;store&nbsp; ]</a><a href="#about">about</a>
-      </nav>
-      <div class="header-actions"><button id="saved-toggle" aria-pressed="false">♧ &nbsp; saved <span id="saved-count">00</span></button><a href="https://www.leolune.com" target="_blank" rel="noopener">portfolio ↗</a></div>
+      <a class="wordmark" href="#top" aria-label="Leo Lune store"><img src="leo-mark.png" alt="Leo Lune" width="61" height="30"><span>Store</span></a>
+      <div class="header-actions"><button id="saved-toggle" aria-pressed="false"><svg aria-hidden="true" viewBox="0 0 16 20" width="12" height="15"><path d="M2 1h12v17l-6-4-6 4Z" fill="none" stroke="currentColor"/></svg> Saved <span id="saved-count">00</span></button><a href="https://www.leolune.com" target="_blank" rel="noopener"><span class="arrow-circle" aria-hidden="true">↗</span> Portfolio</a></div>
     </header>
     <aside class="sidebar" aria-label="Collection filters">
-      <p class="eyebrow">// THE STORE</p>
+      <p class="eyebrow">ARTWORK / 001—012</p>
       <div class="categories">
-        <button class="active" data-filter="all" aria-pressed="true"><span>All work <small>12</small></span><em>The full collection</em></button>
+        <button class="active" data-filter="all" aria-pressed="true"><span>All work <small>12</small></span></button>
         <button data-filter="framed" aria-pressed="false"><span>Framed editions <small>00</small></span><em>Coming soon.</em></button>
-        <button data-filter="digital" aria-pressed="false"><span>Digital downloads <small>12</small></span><em>Pay what you want, from £0</em></button>
+        <button data-filter="digital" aria-pressed="false"><span>Downloads <small>12</small></span><em>Free, or pay what you want.</em></button>
       </div>
       <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find an artwork" aria-label="Find an artwork"></label>
       <details class="orientation"><summary>Orientation <span>+</span></summary><div><label><input type="radio" name="orientation" value="all" checked> All</label><label><input type="radio" name="orientation" value="portrait"> Portrait</label><label><input type="radio" name="orientation" value="landscape"> Landscape</label></div></details>
-      <section class="sidebar-story" id="about"><h2>something for<br>your space.</h2><p>A file to make your own.<br>A framed piece to take home.<br>Two ways to live with the work.</p><button id="how-button">How it works &nbsp; ↗</button></section>
-      <p class="sidebar-footer">independent artist<br>Gibraltar / online</p>
+      <p class="sidebar-footer">GI / GIBRALTAR<br>PNG files. No sign-up.</p>
     </aside>
 
     <main id="top">
       <section class="hero">
-        <p class="eyebrow">// leo lune. / collected works</p>
-        <h1>art, in your hands.</h1>
-        <div class="hero-bottom"><p class="intro">Download something you love, or take home a framed piece.<br>Different ways to own the work. All in one place.</p><p class="hero-aside"><strong>digital &amp; physical.</strong><br>Pay what you want for files.<br>Framed editions coming soon.</p></div>
+        <p class="eyebrow">LEO LUNE / STORE</p>
+        <h1>Stuff I've made.</h1>
+        <div class="hero-bottom"><p class="intro">Download it. Print it. Put it up.</p><p class="hero-aside">YOURS FROM £0 <span aria-hidden="true">↙</span></p></div>
       </section>
 
       <section class="collection" id="work" aria-labelledby="collection-heading">
         <div class="section-heading">
           <h2 id="collection-heading">All work</h2>
-          <div class="view-controls"><select id="sort" aria-label="Sort artwork"><option value="curated">Curated order</option><option value="title">Title A–Z</option></select><button data-columns="3" aria-label="Three-column grid" aria-pressed="true">⊞</button><button data-columns="2" aria-label="Two-column grid" aria-pressed="false">▥</button></div>
+          <div class="view-controls"><select id="sort" aria-label="Sort artwork"><option value="curated">Featured</option><option value="title">Title A–Z</option></select><button data-columns="3" aria-label="Three-column grid" aria-pressed="true">⊞</button><button data-columns="2" aria-label="Two-column grid" aria-pressed="false">▥</button></div>
         </div>
         <div class="art-grid" id="art-grid"></div>
       </section>
 
-      <p class="empty-state" id="empty-state" hidden>No pieces here yet. Try another filter or save a piece with +.</p>
+      <p class="empty-state" id="empty-state" hidden>No matches. Try another filter.</p>
     </main>
+    </div>
 
     <footer>
-      <span><strong>THE DIGITAL COLLECTION</strong> &nbsp; / &nbsp; Original PNG downloads. From £0.</span><span>© <span id="year"></span> leo lune.</span>
+      <span>Made by Leo Lune.</span><span>© <span id="year"></span></span>
     </footer>
 
     <dialog class="purchase-dialog" id="purchase-dialog" aria-labelledby="dialog-title">
@@ -73,7 +71,7 @@
               <span class="currency-input"><span>£</span><input id="custom-amount" type="number" min="1" max="500" step="1" inputmode="decimal" /></span>
             </label>
           </fieldset>
-          <p class="support-copy">The download is free to everyone. Any payment is optional support for future work.</p>
+          <p class="support-copy">£0 is fine. Anything extra helps me make more.</p>
           <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
           <button class="primary-button" id="checkout-button" type="submit">Download for free</button>
         </form>
@@ -82,6 +80,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <script src="config.js"></script>
-    <script type="module" src="app.js?v=5"></script>
+    <script type="module" src="app.js?v=6"></script>
   </body>
 </html>

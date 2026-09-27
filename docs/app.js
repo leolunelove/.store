@@ -22,7 +22,7 @@ function renderCollection() {
   document.querySelector("#collection-heading").innerHTML = `${savedOnly ? "Saved work" : filter === "framed" ? "Framed editions · coming soon" : filter === "digital" ? "Digital downloads" : "All work"} <span>${String(visible.length).padStart(2,"0")}</span>`;
   document.querySelector("#saved-count").textContent = String(editions.filter(p => saved.has(p.key)).length).padStart(2,"0");
   document.querySelector("#empty-state").hidden = visible.length > 0;
-  document.querySelector("#empty-state").textContent = filter === "framed" ? "Framed editions are coming soon. Explore the digital collection in the meantime." : "No pieces here yet. Try another filter or save a piece with +.";
+  document.querySelector("#empty-state").textContent = filter === "framed" ? "No framed pieces yet." : savedOnly ? "Nothing saved yet. Hit + on a piece to keep it here." : "No matches. Try another filter.";
   document.querySelector("#art-grid").innerHTML = visible.map(p => `
     <article class="art-card">
       <button class="save-art" data-save="${p.key}" aria-label="${saved.has(p.key) ? "Unsave" : "Save"} ${p.title} ${p.type} edition" aria-pressed="${saved.has(p.key)}">${saved.has(p.key) ? "−" : "+"}</button>
@@ -45,7 +45,6 @@ document.querySelectorAll("[data-columns]").forEach(button => button.addEventLis
   document.querySelector("#art-grid").classList.toggle("two-columns",button.dataset.columns === "2");
   document.querySelectorAll("[data-columns]").forEach(b => b.setAttribute("aria-pressed",String(b === button)));
 }));
-document.querySelector("#how-button").addEventListener("click",() => showToast("Choose a digital edition and select £0 to download free, or leave optional support. Framed editions are coming soon."));
 
 function showToast(message) {
   toast.textContent = message;
@@ -119,7 +118,7 @@ form.addEventListener("submit", async (event) => {
   if (amount === 0) {
     triggerDownload(selectedProduct.image, selectedProduct.title);
     dialog.close();
-    showToast("Your download has started. Thank you for enjoying the work.");
+    showToast("Downloading. Enjoy it.");
     return;
   }
   if (!Number.isInteger(amount) || amount < 100 || amount > 50000) {
@@ -127,7 +126,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
   if (!apiBaseUrl) {
-    status.textContent = "Paid support is coming soon. You can still choose £0 to download this piece for free.";
+    status.textContent = "Payments aren't connected yet. Choose £0 to download.";
     return;
   }
 
@@ -168,7 +167,7 @@ async function handleCheckoutReturn() {
     const product = PRODUCTS.find((item) => item.id === data.productId);
     if (!product) throw new Error("Artwork could not be found");
     triggerDownload(product.image, product.title);
-    showToast("Payment confirmed — thank you. Your download has started.");
+    showToast("Thanks for the support. Downloading now.");
     history.replaceState({}, "", window.location.pathname);
   } catch (error) {
     showToast(error.message || "We could not confirm the payment. Refresh to try again.");
