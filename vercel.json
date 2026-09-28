@@ -1,0 +1,9 @@
+{
+  "buildCommand": "node scripts/build-store.mjs",
+  "outputDirectory": "docs",
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 10
+    }
+  }
+}
