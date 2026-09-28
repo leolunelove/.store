@@ -34,6 +34,7 @@ main{margin-left:228px;padding:36px 38px 64px}
 .view-controls select{font-family:inherit}.view-controls button{border-radius:6px;width:27px;height:27px;padding:0}
 .view-controls button[aria-pressed=true]{background:#ffffff0b}
 .art-grid{gap:32px 20px}.art-stage{border-radius:22px;background:#202022;aspect-ratio:.86}
+.art-meta .price strong{font-size:11px;font-weight:400;letter-spacing:0;white-space:nowrap}.price strong>span{display:inline-block;margin-left:3px;color:var(--muted)}.art-meta .price small{color:var(--muted);font-size:9px}.amounts button:disabled{opacity:.35;cursor:not-allowed}.amounts button.selected{font-weight:500}
 .art-stage img{filter:drop-shadow(4px 12px 12px #0004)}
 .edition{left:19px;top:17px;font-size:8px;color:#a9a9b0}.art-type{left:19px;bottom:16px;font-size:8px;color:#a9a9b0}
 .save-art{right:10px;top:10px;border-radius:50%;width:30px;height:30px;font-size:20px;background:#ffffff08}

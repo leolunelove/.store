@@ -11,6 +11,13 @@ const toast = document.querySelector("#toast");
 let selectedProduct = null;
 let selectedAmount = 0;
 
+// Keep the free path clear while the optional payment backend is unconfigured.
+if (!apiBaseUrl) {
+  document.querySelectorAll('.amounts button:not([data-amount="0"])').forEach(button => { button.disabled = true; });
+  document.querySelector('#purchase-form legend').textContent = 'Free download';
+  document.querySelector('#support-copy').textContent = 'Optional support is coming soon. The download is yours either way.';
+}
+
 document.querySelector("#year").textContent = new Date().getFullYear();
 let saved;
 try { saved = new Set(JSON.parse(localStorage.getItem("leo-lune-saved") || "[]")); } catch { saved = new Set(); }
@@ -28,7 +35,7 @@ function renderCollection() {
       <button class="save-art" data-save="${p.key}" aria-label="${saved.has(p.key) ? "Unsave" : "Save"} ${p.title} ${p.type} edition" aria-pressed="${saved.has(p.key)}">${saved.has(p.key) ? "−" : "+"}</button>
       <button class="art-open" data-product="${p.id}" data-type="${p.type}" aria-label="View ${p.title} ${p.type} edition">
         <span class="art-stage ${p.type} ${p.orientation}"><span class="edition">${p.number} / digital</span><img src="${p.image}" alt="${p.title}, digital artwork" loading="lazy" width="1080" height="1440"><span class="art-type">▣ &nbsp; DIGITAL DOWNLOAD</span></span>
-        <span class="art-meta"><span><strong>${p.title}</strong><small>1080 × 1440 px · PNG</small></span><span class="price"><strong>From £0</strong><small>Pay what you want</small></span></span>
+        <span class="art-meta"><span><strong>${p.title}</strong><small>1080 × 1440 px · PNG</small></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong><small>${apiBaseUrl ? 'Pay what you want' : 'No sign-up'}</small></span></span>
       </button>
     </article>`).join("");
 }
@@ -55,6 +62,7 @@ function showToast(message) {
 function chooseAmount(value) {
   document.querySelectorAll(".amounts button").forEach((button) => {
     button.classList.toggle("selected", button.dataset.amount === String(value));
+    button.setAttribute("aria-pressed", String(button.dataset.amount === String(value)));
   });
   customLabel.hidden = value !== "custom";
   selectedAmount = value === "custom" ? null : Number(value);
@@ -126,7 +134,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
   if (!apiBaseUrl) {
-    status.textContent = "Payments aren't connected yet. Choose £0 to download.";
+    status.textContent = "Payments aren't connected yet. Choose Free to download.";
     return;
   }
 
