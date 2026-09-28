@@ -1,7 +1,8 @@
 import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=8';
-import { amountInPennies, fileOptions, filterProducts } from './store-utils.js?v=8';
+import { amountInPennies, fileOptions, filterProducts, liveSupportLink } from './store-utils.js?v=10';
 const $ = selector => document.querySelector(selector);
 const apiBaseUrl = String(window.LEO_LUNE_CONFIG?.apiBaseUrl || '').replace(/\/$/, '');
+const supportPaymentLink = liveSupportLink(window.LEO_LUNE_CONFIG?.supportPaymentLink);
 const rootUrl = new URL('./', document.baseURI);
 const dialog = $('#purchase-dialog'), viewer = $('#art-viewer'), form = $('#purchase-form');
 let selectedProduct = null, selectedAmount = 0, category = 'all', savedOnly = false;
@@ -18,10 +19,16 @@ document.querySelectorAll('[data-count]').forEach(el => {
 });
 if (!apiBaseUrl) {
   $('#amount-fieldset').hidden = true;
-  $('#support-copy').textContent = 'Optional support is coming soon. Downloads stay free.';
+  $('#support-copy').textContent = supportPaymentLink ? "If it means something to you, pay what it's worth. Downloads stay free." : 'Optional support is coming soon. Downloads stay free.';
+}
+if (supportPaymentLink && !apiBaseUrl) {
+  $('#support-link').href = supportPaymentLink;
+  $('#support-link').hidden = false;
 }
 function showToast(message) {
   clearTimeout(toastTimer);
+  // Dialogs occupy the browser's top layer; keep feedback above their backdrop.
+  (viewer.open ? viewer : dialog.open ? dialog : document.body).append($('#toast'));
   $('#toast').textContent = message;
   $('#toast').classList.add('visible');
   toastTimer = setTimeout(()=>$('#toast').classList.remove('visible'), 6000);

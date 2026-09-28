@@ -1,3 +1,9 @@
+export function liveSupportLink(raw) {
+  try {
+    const url = new URL(raw);
+    return url.protocol === 'https:' && url.hostname === 'buy.stripe.com' && !url.username && !url.password && !url.port && /^\/[A-Za-z0-9]+$/.test(url.pathname) ? url.href : '';
+  } catch { return ''; }
+}
 export function amountInPennies(raw) {
   const text = String(raw).trim();
   if (!/^\d+(\.\d{1,2})?$/.test(text)) return null;
