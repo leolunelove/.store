@@ -1,7 +1,8 @@
 # Leo Lune store
 
 The live storefront is **https://leolune.store**, hosted by GitHub Pages from `main /docs`.
-The optional payment backend is prepared for Vercel but is **not connected**. Free original downloads do not require a server or account.
+Optional support uses a live Stripe Payment Link in `docs/config.js`: customer-chosen GBP amounts (£1–£500, £5 suggested). Downloads remain unconditional and free; Stripe hosts checkout and payment records. Only a public payment URL is shipped to GitHub Pages, never API keys.
+The alternative Vercel payment backend is **not connected** and is not production-complete. Add and verify a signed, idempotent webhook handler before enabling any automated paid fulfillment. Returning from the Payment Link does not prove payment and triggers no paid fulfillment.
 
 ## What is included
 
@@ -9,7 +10,7 @@ The optional payment backend is prepared for Vercel but is **not connected**. Fr
 - Smaller 320px and 640px JPEG previews; original files load only for full-size viewing or downloads.
 - Individual artwork HTML pages with canonical URLs, Open Graph/Twitter metadata, a sitemap and a no-JavaScript download fallback.
 - Full-screen original viewer, zoom, keyboard navigation, meaningful category filters and saved work stored only on the visitor's device.
-- Free-first downloads. Paid support stays hidden until `docs/config.js` points to a configured backend.
+- Free-first downloads with a separate optional “Support the work” link. The custom API remains disabled.
 - A server-controlled Stripe Checkout flow with strict product/file validation, GBP amount bounds, retry idempotency and payment verification.
 
 ## Edit artwork and regenerate pages
