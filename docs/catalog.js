@@ -12,4 +12,23 @@ export const PRODUCTS = [
   { id: "i-want-to-beat-somebody-up", title: "I Want to Beat Somebody Up", file: "I want to beat somebody up.png" },
   { id: "fingertips", title: "Fingertips", file: "fingertips-1.png" },
   { id: "selfie", title: "Selfie", file: "selfie.png" }
-].map((product, index) => ({ ...product, image: `downloads/${encodeURIComponent(product.file)}`, orientation: "portrait", number: String(index + 1).padStart(2,"0") }));
+].map((product, index) => ({
+  ...product,
+  image: `downloads/${encodeURIComponent(product.file)}`,
+  preview: `preview-${product.id}.jpg`,
+  previewSmall: `preview-${product.id}-small.jpg`,
+  page: `${product.id}.html`,
+  width: 1080,
+  height: 1440,
+  // Add a real print master here when supplied; never upscale the screen file.
+  printFile: null,
+  category: ['who-made-you-king', 'xtcy', 'sensory', 'fingertips', 'selfie'].includes(product.id) ? 'photo' : 'type',
+  number: String(index + 1).padStart(2, '0')
+}));
+
+// Change this list to rotate the opening row without renaming files or links.
+export const FEATURED_IDS = ['fingertips', 'im-half-crazy', 'who-made-you-king'];
+export const FEATURED_PRODUCTS = [...PRODUCTS].sort((a, b) => {
+  const rank = id => FEATURED_IDS.includes(id) ? FEATURED_IDS.indexOf(id) : FEATURED_IDS.length;
+  return rank(a.id) - rank(b.id);
+});
