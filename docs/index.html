@@ -8,12 +8,14 @@
   <link rel="canonical" href="https://leolune.store/">
   <meta property="og:type" content="website"><meta property="og:site_name" content="Leo Lune">
   <meta property="og:title" content="Leo Lune — Store"><meta property="og:description" content="Stuff I&#39;ve made. Free artwork downloads by Leo Lune. Download it. Print it. Put it up.">
-  <meta property="og:url" content="https://leolune.store/"><meta property="og:image" content="https://leolune.store/preview-fingertips.jpg">
-  <meta property="og:image:width" content="640"><meta property="og:image:height" content="853"><meta property="og:image:alt" content="Fingertips by Leo Lune">
-  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Leo Lune — Store"><meta name="twitter:description" content="Stuff I&#39;ve made. Free artwork downloads by Leo Lune. Download it. Print it. Put it up."><meta name="twitter:image" content="https://leolune.store/preview-fingertips.jpg">
+  <meta property="og:url" content="https://leolune.store/"><meta property="og:image" content="https://leolune.store/share-store.png">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Fingertips by Leo Lune">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Leo Lune — Store"><meta name="twitter:description" content="Stuff I&#39;ve made. Free artwork downloads by Leo Lune. Download it. Print it. Put it up."><meta name="twitter:image" content="https://leolune.store/share-store.png">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="stylesheet" href="gallery.css?v=8">
-  <link rel="stylesheet" href="experience.css?v=11">
+  <link rel="stylesheet" href="experience.css?v=13">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
   <a class="skip-link" href="#work">Skip to artwork</a>
@@ -32,7 +34,7 @@
         <button data-filter="type" aria-pressed="false"><span>Type-led <small data-count="type">07</small></span></button>
         <button data-filter="photo" aria-pressed="false"><span>Photo-led <small data-count="photo">05</small></span></button>
       </div>
-      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find an artwork" aria-label="Find an artwork"></label>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Title, colour, subject…" aria-label="Search by title, colour or subject"></label>
       <p class="sidebar-footer">GI / GIBRALTAR<br>PNG files. No sign-up.</p>
     </aside>
     <main id="top">
@@ -55,7 +57,7 @@
       <noscript><section class="noscript-art"><h2>Download artwork</h2><p>Original PNGs for personal use. Free, with no sign-up.</p><a href="downloads/fingertips-1.png" download="fingertips-1.png"><img src="preview-fingertips-small.jpg" alt="Fingertips" width="160" height="213">Download Fingertips</a><a href="downloads/IM%20HALF%20CRAZY.png" download="IM HALF CRAZY.png"><img src="preview-im-half-crazy-small.jpg" alt="I&#39;m Half Crazy" width="160" height="213">Download I&#39;m Half Crazy</a><a href="downloads/who%20made%20you%20king.png" download="who made you king.png"><img src="preview-who-made-you-king-small.jpg" alt="Who Made You King" width="160" height="213">Download Who Made You King</a><a href="downloads/smile.png" download="smile.png"><img src="preview-smile-small.jpg" alt="Smile" width="160" height="213">Download Smile</a><a href="downloads/High%20and%20lows.png" download="High and lows.png"><img src="preview-high-and-lows-small.jpg" alt="High and Lows" width="160" height="213">Download High and Lows</a><a href="downloads/why.png" download="why.png"><img src="preview-why-small.jpg" alt="Why" width="160" height="213">Download Why</a><a href="downloads/xtcy.png" download="xtcy.png"><img src="preview-xtcy-small.jpg" alt="XTCY" width="160" height="213">Download XTCY</a><a href="downloads/famous.png" download="famous.png"><img src="preview-famous-small.jpg" alt="Famous" width="160" height="213">Download Famous</a><a href="downloads/sensory.png" download="sensory.png"><img src="preview-sensory-small.jpg" alt="Sensory" width="160" height="213">Download Sensory</a><a href="downloads/smoking%20crack%20is%20bad.png" download="smoking crack is bad.png"><img src="preview-smoking-crack-is-bad-small.jpg" alt="Smoking Crack Is Bad" width="160" height="213">Download Smoking Crack Is Bad</a><a href="downloads/I%20want%20to%20beat%20somebody%20up.png" download="I want to beat somebody up.png"><img src="preview-i-want-to-beat-somebody-up-small.jpg" alt="I Want to Beat Somebody Up" width="160" height="213">Download I Want to Beat Somebody Up</a><a href="downloads/selfie.png" download="selfie.png"><img src="preview-selfie-small.jpg" alt="Selfie" width="160" height="213">Download Selfie</a></section></noscript>
     </main>
   </div>
-  <footer><span>Made by Leo Lune.</span><span>© <span id="year"></span></span></footer>
+  <footer><span>Made by Leo Lune.</span><a href="mailto:leolunedesign@gmail.com?subject=Artwork%20enquiry">Ask about a print / other uses ↗</a><span>© <span id="year"></span></span></footer>
 
   <dialog class="purchase-dialog" id="purchase-dialog" aria-labelledby="dialog-title">
     <button class="close-button" id="close-artwork" type="button" aria-label="Close artwork">×</button>
@@ -63,8 +65,10 @@
       <img id="dialog-image" alt="" width="600" height="800"><span class="zoom-hint">View full size ↗</span>
     </button>
     <div class="dialog-content">
+      <a class="back-to-work" href="./">← All work</a>
       <p class="eyebrow">DIGITAL DOWNLOAD</p>
       <h2 id="dialog-title"></h2>
+      <nav class="artwork-navigation" aria-label="Browse artwork"><button id="artwork-previous" type="button" aria-label="Previous artwork">← Previous</button><span id="artwork-position"></span><button id="artwork-next" type="button" aria-label="Next artwork">Next →</button></nav>
       <p class="dialog-note" id="dialog-note"></p>
       <div class="artwork-tools"><button id="native-share" type="button" hidden>Share ↗</button><button id="share-artwork" type="button">Copy link ↗</button><a id="artwork-permalink" href="./">Open artwork page ↗</a></div>
       <label class="file-choice" id="file-choice" hidden>File <select id="file-format" aria-label="Download file format"></select></label>
@@ -90,6 +94,6 @@
     <div class="viewer-navigation"><button id="viewer-previous" aria-label="Previous artwork">← Previous</button><span id="viewer-position"></span><button id="viewer-next" aria-label="Next artwork">Next →</button></div>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="config.js?v=10"></script><script type="module" src="app.js?v=11"></script>
+  <script src="config.js?v=12"></script><script type="module" src="app.js?v=12"></script>
 </body>
 </html>

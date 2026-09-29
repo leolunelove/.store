@@ -1,10 +1,17 @@
-import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=8';
-import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, shareArtwork } from './store-utils.js?v=11';
+import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=12';
+import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, shareArtwork, adjacentArtwork } from './store-utils.js?v=12';
+import { createTracker } from './analytics.js?v=12';
 const $ = selector => document.querySelector(selector);
 const apiBaseUrl = String(window.LEO_LUNE_CONFIG?.apiBaseUrl || '').replace(/\/$/, '');
 const supportPaymentLink = liveSupportLink(window.LEO_LUNE_CONFIG?.supportPaymentLink);
 const rootUrl = new URL('./', document.baseURI);
 const dialog = $('#purchase-dialog'), viewer = $('#art-viewer'), form = $('#purchase-form');
+const directEntry = Boolean(document.body.dataset.artwork);
+const track = createTracker(window.LEO_LUNE_CONFIG?.analyticsEndpoint);
+let browsingProducts = FEATURED_PRODUCTS;
+let lastViewedId = null;
+const bookmark = '<svg viewBox="0 0 16 20" width="14" height="18" fill="none" aria-hidden="true"><path d="M2 1h12v17l-6-4-6 4Z" stroke="currentColor" stroke-width="1.5"/></svg>';
+function currentCollection() { return filterProducts(FEATURED_PRODUCTS, { category, query: $('#search').value, savedOnly, saved, sort: $('#sort').value }); }
 let selectedProduct = null, selectedAmount = 0, category = 'all', savedOnly = false;
 let toastTimer, checkoutAbort, checkoutIntent = '', requestId = '', opener;
 let saved;
@@ -28,6 +35,8 @@ if (supportPaymentLink && !apiBaseUrl) {
   $('#hero-support').hidden = false;
 }
 $('#native-share').hidden = typeof navigator.share !== 'function';
+$('#support-link').addEventListener('click',()=>track('support_click',selectedProduct?.id));
+$('#hero-support').addEventListener('click',()=>track('support_click'));
 function showToast(message) {
   clearTimeout(toastTimer);
   // Dialogs occupy the browser's top layer; keep feedback above their backdrop.
@@ -37,16 +46,16 @@ function showToast(message) {
   toastTimer = setTimeout(()=>$('#toast').classList.remove('visible'), 6000);
 }
 function renderCollection() {
-  const visible = filterProducts(FEATURED_PRODUCTS, { category, query: $('#search').value, savedOnly, saved, sort: $('#sort').value });
+  const visible = currentCollection();
   const label = savedOnly ? 'Saved work' : {all:'All work', type:'Type-led', photo:'Photo-led'}[category];
   $('#collection-heading').innerHTML = `${label} <span>${String(visible.length).padStart(2,'0')}</span>`;
   $('#saved-count').textContent = String(PRODUCTS.filter(p=>saved.has(`${p.id}-digital`)).length).padStart(2,'0');
   $('#saved-toggle').setAttribute('aria-pressed', String(savedOnly));
   $('#empty-state').hidden = visible.length > 0;
-  $('#empty-message').textContent = savedOnly ? 'No matches in your saved work. Hit + on a piece to save it.' : 'No matches. Try another filter.';
+  $('#empty-message').textContent = savedOnly ? 'No matches in your saved work. Use the bookmark on a piece to save it.' : 'No matches. Try another filter.';
   $('#art-grid').innerHTML = visible.map((p, index) => `
     <article class="art-card">
-      <button class="save-art" data-save="${p.id}-digital" aria-label="${saved.has(`${p.id}-digital`) ? 'Unsave' : 'Save'} ${p.title}" aria-pressed="${saved.has(`${p.id}-digital`)}">${saved.has(`${p.id}-digital`) ? '−' : '+'}</button>
+      <button class="save-art" data-save="${p.id}-digital" title="${saved.has(`${p.id}-digital`) ? 'Remove from saved' : 'Save artwork'}" aria-label="${saved.has(`${p.id}-digital`) ? 'Unsave' : 'Save'} ${p.title}" aria-pressed="${saved.has(`${p.id}-digital`)}">${bookmark}</button>
       <a class="art-open" href="${p.page}" data-product="${p.id}" aria-label="View ${p.title}">
         <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 640w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
         <span class="art-meta"><span><strong>${p.title}</strong></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong></span></span>
@@ -73,12 +82,13 @@ $('#art-grid').addEventListener('click', event=>{
     saved.has(key) ? saved.delete(key) : saved.add(key);
     try { localStorage.setItem('leo-lune-saved', JSON.stringify([...saved])); } catch {}
     renderCollection();
+    showToast(saved.has(key) ? 'Saved on this device.' : 'Removed from saved.');
     document.querySelector(`[data-save="${key}"]`)?.focus({preventScroll:true});
     return;
   }
   const link = event.target.closest('[data-product]');
   if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-  event.preventDefault(); opener = link.dataset.product; openArtwork(link.dataset.product, true);
+  event.preventDefault(); browsingProducts = currentCollection(); opener = link.dataset.product; openArtwork(link.dataset.product, true);
 });
 function pageUrl(product) { return new URL(product.page, rootUrl); }
 function selectedFile() { return fileOptions(selectedProduct).find(f=>f.id === $('#file-format').value) || fileOptions(selectedProduct)[0]; }
@@ -86,6 +96,9 @@ function openArtwork(id, updateHistory = false) {
   const product = PRODUCTS.find(p=>p.id === id);
   if (!product) return;
   checkoutAbort?.abort(); selectedProduct = product;
+  if (lastViewedId !== id) { track('artwork_view', id); lastViewedId = id; }
+  $('#artwork-position').textContent = `${browsingProducts.findIndex(p=>p.id === id) + 1} / ${browsingProducts.length}`;
+  for (const selector of ['#artwork-previous','#artwork-next','#viewer-previous','#viewer-next']) $(selector).disabled = browsingProducts.length < 2;
   $('#download-followup').hidden = true;
   $('#keep-browsing').hidden = true;
   $('#dialog-title').textContent = product.title;
@@ -98,9 +111,10 @@ function openArtwork(id, updateHistory = false) {
   $('#checkout-button').disabled = false; form.reset(); chooseAmount('0');
   if (updateHistory && location.pathname !== pageUrl(product).pathname) history.pushState({artOverlay:true}, '', pageUrl(product));
   document.title = `${product.title} — Leo Lune`;
-  if (!dialog.open) dialog.showModal();
+  if (!dialog.open) directEntry ? dialog.show() : dialog.showModal();
 }
 function closeArtwork(updateHistory = true) {
+  if (directEntry) { location.assign(rootUrl.href); return; }
   checkoutAbort?.abort();
   if (viewer.open) viewer.close();
   if (dialog.open) dialog.close();
@@ -135,7 +149,7 @@ $('#native-share').addEventListener('click',async()=>{
 $('#keep-browsing').addEventListener('click',()=>closeArtwork());
 function loadViewer() {
   $('#viewer-title').textContent = selectedProduct.title;
-  $('#viewer-position').textContent = `${FEATURED_PRODUCTS.indexOf(selectedProduct) + 1} / ${PRODUCTS.length}`;
+  $('#viewer-position').textContent = `${browsingProducts.indexOf(selectedProduct) + 1} / ${browsingProducts.length}`;
   $('#viewer-status').hidden = false; $('#viewer-status').textContent = 'Loading original…';
   $('#viewer-image').alt = selectedProduct.title; $('#viewer-image').src = new URL(selectedProduct.image, rootUrl);
   $('#viewer-canvas').classList.remove('zoomed'); $('#viewer-zoom').setAttribute('aria-pressed', 'false'); $('#viewer-zoom').textContent = 'Zoom in';
@@ -149,9 +163,14 @@ $('#viewer-zoom').addEventListener('click',()=>{
   $('#viewer-zoom').setAttribute('aria-pressed', String(zoomed)); $('#viewer-zoom').textContent = zoomed ? 'Fit to screen' : 'Zoom in';
 });
 function moveViewer(delta) {
-  const index = (FEATURED_PRODUCTS.indexOf(selectedProduct) + delta + PRODUCTS.length) % PRODUCTS.length;
-  openArtwork(FEATURED_PRODUCTS[index].id); history.replaceState(history.state, '', pageUrl(selectedProduct)); loadViewer();
+  const next = adjacentArtwork(browsingProducts, selectedProduct.id, delta);
+  if (!next || browsingProducts.length < 2) return;
+  if (directEntry) { location.assign(pageUrl(next).href); return; }
+  openArtwork(next.id); history.replaceState(history.state, '', pageUrl(selectedProduct));
+  if (viewer.open) loadViewer();
 }
+$('#artwork-previous').addEventListener('click',()=>moveViewer(-1));
+$('#artwork-next').addEventListener('click',()=>moveViewer(1));
 $('#viewer-previous').addEventListener('click',()=>moveViewer(-1));
 $('#viewer-next').addEventListener('click',()=>moveViewer(1));
 viewer.addEventListener('keydown',event=>{
@@ -179,6 +198,7 @@ function triggerDownload(file) {
 form.addEventListener('submit',async event=>{
   event.preventDefault(); const pennies = amount(); $('#form-status').textContent = '';
   if (pennies === 0) {
+    track('download_click',selectedProduct.id);
     triggerDownload(selectedFile());
     $('#download-followup').hidden = false;
     $('#keep-browsing').hidden = false;

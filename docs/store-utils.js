@@ -26,6 +26,13 @@ export function fileOptions(product) {
   return files;
 }
 export function filterProducts(products, { category = 'all', query = '', savedOnly = false, saved = new Set(), sort = 'curated' } = {}) {
-  const visible = products.filter(p => (category === 'all' || p.category === category) && (!savedOnly || saved.has(`${p.id}-digital`)) && p.title.toLowerCase().includes(query.trim().toLowerCase()));
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const visible = products.filter(p => (category === 'all' || p.category === category) && (!savedOnly || saved.has(`${p.id}-digital`)) && terms.every(term => `${p.title} ${(p.tags || []).join(' ')}`.toLowerCase().includes(term)));
   return sort === 'title' ? visible.sort((a,b)=>a.title.localeCompare(b.title)) : visible;
+}
+export function adjacentArtwork(products, id, delta) {
+  if (!products.length) return null;
+  const index = products.findIndex(p=>p.id === id);
+  if (index < 0) return null;
+  return products[(index + delta + products.length) % products.length];
 }

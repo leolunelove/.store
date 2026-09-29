@@ -1,3 +1,18 @@
+// Search vocabulary is curated, not inferred from visitors or external services.
+const TAGS = {
+  'im-half-crazy': 'orange black typography type collage grunge',
+  smile: 'yellow white typography type happy cartoon',
+  'who-made-you-king': 'black cream sword rock photo king',
+  'high-and-lows': 'red cream typography type texture',
+  why: 'orange yellow black typography type silhouette',
+  xtcy: 'pink red teal green photo portrait',
+  famous: 'green yellow black typography type blur',
+  sensory: 'blue yellow hands photo texture',
+  'smoking-crack-is-bad': 'yellow orange typography type lettering',
+  'i-want-to-beat-somebody-up': 'red orange typography type lettering collage',
+  fingertips: 'blue pink cream hands photo halftone',
+  selfie: 'portrait photo red green cream collage'
+};
 // One catalogue is shared by the gallery and the server-side product allowlist.
 export const PRODUCTS = [
   { id: "im-half-crazy", title: "I'm Half Crazy", file: "IM HALF CRAZY.png" },
@@ -14,6 +29,7 @@ export const PRODUCTS = [
   { id: "selfie", title: "Selfie", file: "selfie.png" }
 ].map((product, index) => ({
   ...product,
+  tags: TAGS[product.id].split(' '),
   image: `downloads/${encodeURIComponent(product.file)}`,
   preview: `preview-${product.id}.jpg`,
   previewSmall: `preview-${product.id}-small.jpg`,

@@ -8,15 +8,17 @@
   <link rel="canonical" href="https://leolune.store/xtcy.html">
   <meta property="og:type" content="website"><meta property="og:site_name" content="Leo Lune">
   <meta property="og:title" content="XTCY — Leo Lune"><meta property="og:description" content="XTCY by Leo Lune. Free original PNG download, 1080 × 1440 px. No sign-up.">
-  <meta property="og:url" content="https://leolune.store/xtcy.html"><meta property="og:image" content="https://leolune.store/preview-xtcy.jpg">
-  <meta property="og:image:width" content="640"><meta property="og:image:height" content="853"><meta property="og:image:alt" content="XTCY by Leo Lune">
-  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="XTCY — Leo Lune"><meta name="twitter:description" content="XTCY by Leo Lune. Free original PNG download, 1080 × 1440 px. No sign-up."><meta name="twitter:image" content="https://leolune.store/preview-xtcy.jpg">
+  <meta property="og:url" content="https://leolune.store/xtcy.html"><meta property="og:image" content="https://leolune.store/share-xtcy.png">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="XTCY by Leo Lune">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="XTCY — Leo Lune"><meta name="twitter:description" content="XTCY by Leo Lune. Free original PNG download, 1080 × 1440 px. No sign-up."><meta name="twitter:image" content="https://leolune.store/share-xtcy.png">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="stylesheet" href="gallery.css?v=8">
-  <link rel="stylesheet" href="experience.css?v=11">
+  <link rel="stylesheet" href="experience.css?v=13">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
-<body>
-  <a class="skip-link" href="#work">Skip to artwork</a>
+<body class="artwork-page" data-artwork="xtcy">
+  <a class="skip-link" href="#dialog-title">Skip to artwork</a>
   <div class="store-shell">
     <header class="site-header">
       <a class="wordmark" href="./" aria-label="Leo Lune store"><img src="leo-mark.png" alt="Leo Lune" width="61" height="30"><span>Store</span></a>
@@ -32,7 +34,7 @@
         <button data-filter="type" aria-pressed="false"><span>Type-led <small data-count="type">07</small></span></button>
         <button data-filter="photo" aria-pressed="false"><span>Photo-led <small data-count="photo">05</small></span></button>
       </div>
-      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Find an artwork" aria-label="Find an artwork"></label>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Title, colour, subject…" aria-label="Search by title, colour or subject"></label>
       <p class="sidebar-footer">GI / GIBRALTAR<br>PNG files. No sign-up.</p>
     </aside>
     <main id="top">
@@ -53,18 +55,16 @@
         <div class="empty-state" id="empty-state" hidden><p id="empty-message"></p><button id="reset-filters">Reset filters</button></div>
       </section>
       <noscript><section class="noscript-art"><h2>XTCY</h2><p>Original PNGs for personal use. Free, with no sign-up.</p><a href="downloads/xtcy.png" download="xtcy.png"><img src="preview-xtcy-small.jpg" alt="XTCY" width="160" height="213">Download XTCY</a></section></noscript>
-    </main>
-  </div>
-  <footer><span>Made by Leo Lune.</span><span>© <span id="year"></span></span></footer>
-
-  <dialog class="purchase-dialog" id="purchase-dialog" aria-labelledby="dialog-title">
+      <dialog class="purchase-dialog" id="purchase-dialog" open aria-labelledby="dialog-title">
     <button class="close-button" id="close-artwork" type="button" aria-label="Close artwork">×</button>
     <button class="dialog-art" id="open-viewer" type="button" aria-label="View artwork full screen">
-      <img id="dialog-image" alt="" width="600" height="800"><span class="zoom-hint">View full size ↗</span>
+      <img id="dialog-image" src="preview-xtcy.jpg" alt="XTCY" width="600" height="800"><span class="zoom-hint">View full size ↗</span>
     </button>
     <div class="dialog-content">
+      <a class="back-to-work" href="./">← All work</a>
       <p class="eyebrow">DIGITAL DOWNLOAD</p>
-      <h2 id="dialog-title"></h2>
+      <h1 id="dialog-title">XTCY</h1>
+      <nav class="artwork-navigation" aria-label="Browse artwork"><button id="artwork-previous" type="button" aria-label="Previous artwork">← Previous</button><span id="artwork-position"></span><button id="artwork-next" type="button" aria-label="Next artwork">Next →</button></nav>
       <p class="dialog-note" id="dialog-note"></p>
       <div class="artwork-tools"><button id="native-share" type="button" hidden>Share ↗</button><button id="share-artwork" type="button">Copy link ↗</button><a id="artwork-permalink" href="./">Open artwork page ↗</a></div>
       <label class="file-choice" id="file-choice" hidden>File <select id="file-format" aria-label="Download file format"></select></label>
@@ -83,6 +83,11 @@
       </form>
     </div>
   </dialog>
+    </main>
+  </div>
+  <footer><span>Made by Leo Lune.</span><a href="mailto:leolunedesign@gmail.com?subject=Artwork%20enquiry">Ask about a print / other uses ↗</a><span>© <span id="year"></span></span></footer>
+
+
 
   <dialog class="art-viewer" id="art-viewer" aria-labelledby="viewer-title">
     <div class="viewer-toolbar"><h2 id="viewer-title"></h2><div><button id="viewer-zoom" aria-pressed="false">Zoom in</button><button id="close-viewer" aria-label="Close full-screen view">×</button></div></div>
@@ -90,6 +95,6 @@
     <div class="viewer-navigation"><button id="viewer-previous" aria-label="Previous artwork">← Previous</button><span id="viewer-position"></span><button id="viewer-next" aria-label="Next artwork">Next →</button></div>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="config.js?v=10"></script><script type="module" src="app.js?v=11"></script>
+  <script src="config.js?v=12"></script><script type="module" src="app.js?v=12"></script>
 </body>
 </html>
