@@ -4,6 +4,15 @@ export function liveSupportLink(raw) {
     return url.protocol === 'https:' && url.hostname === 'buy.stripe.com' && !url.username && !url.password && !url.port && /^\/[A-Za-z0-9]+$/.test(url.pathname) ? url.href : '';
   } catch { return ''; }
 }
+export function printGuide(product) {
+  const cm = pixels => (pixels / 300 * 2.54).toFixed(1);
+  return `For a small print: about ${cm(product.width)} × ${cm(product.height)} cm at 300 ppi. Larger prints will look softer. This isn't a large-poster file.`;
+}
+export async function shareArtwork(data, browserNavigator) {
+  if (!browserNavigator.share) return 'unavailable';
+  try { await browserNavigator.share(data); return 'shared'; }
+  catch (error) { return error.name === 'AbortError' ? 'cancelled' : 'failed'; }
+}
 export function amountInPennies(raw) {
   const text = String(raw).trim();
   if (!/^\d+(\.\d{1,2})?$/.test(text)) return null;

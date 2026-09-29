@@ -1,5 +1,5 @@
 import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=8';
-import { amountInPennies, fileOptions, filterProducts, liveSupportLink } from './store-utils.js?v=10';
+import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, shareArtwork } from './store-utils.js?v=11';
 const $ = selector => document.querySelector(selector);
 const apiBaseUrl = String(window.LEO_LUNE_CONFIG?.apiBaseUrl || '').replace(/\/$/, '');
 const supportPaymentLink = liveSupportLink(window.LEO_LUNE_CONFIG?.supportPaymentLink);
@@ -24,7 +24,10 @@ if (!apiBaseUrl) {
 if (supportPaymentLink && !apiBaseUrl) {
   $('#support-link').href = supportPaymentLink;
   $('#support-link').hidden = false;
+  $('#hero-support').href = supportPaymentLink;
+  $('#hero-support').hidden = false;
 }
+$('#native-share').hidden = typeof navigator.share !== 'function';
 function showToast(message) {
   clearTimeout(toastTimer);
   // Dialogs occupy the browser's top layer; keep feedback above their backdrop.
@@ -45,8 +48,8 @@ function renderCollection() {
     <article class="art-card">
       <button class="save-art" data-save="${p.id}-digital" aria-label="${saved.has(`${p.id}-digital`) ? 'Unsave' : 'Save'} ${p.title}" aria-pressed="${saved.has(`${p.id}-digital`)}">${saved.has(`${p.id}-digital`) ? '−' : '+'}</button>
       <a class="art-open" href="${p.page}" data-product="${p.id}" aria-label="View ${p.title}">
-        <span class="art-stage"><span class="edition">${p.number} / digital</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 640w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"><span class="art-type">DIGITAL DOWNLOAD</span></span>
-        <span class="art-meta"><span><strong>${p.title}</strong><small>${p.width} × ${p.height} px · PNG</small></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong><small>${apiBaseUrl ? 'Pay what you want' : 'No sign-up'}</small></span></span>
+        <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 640w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
+        <span class="art-meta"><span><strong>${p.title}</strong></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong></span></span>
       </a>
     </article>`).join('');
 }
@@ -83,10 +86,12 @@ function openArtwork(id, updateHistory = false) {
   const product = PRODUCTS.find(p=>p.id === id);
   if (!product) return;
   checkoutAbort?.abort(); selectedProduct = product;
+  $('#download-followup').hidden = true;
+  $('#keep-browsing').hidden = true;
   $('#dialog-title').textContent = product.title;
   $('#dialog-image').src = new URL(product.preview, rootUrl); $('#dialog-image').alt = product.title;
   $('#dialog-note').textContent = `Original PNG · ${product.width} × ${product.height} px · 3:4`;
-  $('#print-note').textContent = product.printFile ? 'A larger print master is included. Pick it from the file menu.' : `This is the ${product.width} × ${product.height} original, not a large-format print file.`;
+  $('#print-note').textContent = product.printFile ? 'A larger print master is included. Pick it from the file menu.' : printGuide(product);
   $('#artwork-permalink').href = pageUrl(product);
   $('#file-format').innerHTML = fileOptions(product).map(f=>`<option value="${f.id}">${f.label}</option>`).join('');
   $('#file-choice').hidden = fileOptions(product).length < 2;
@@ -123,6 +128,11 @@ $('#share-artwork').addEventListener('click',async()=>{
   try { await navigator.clipboard.writeText(pageUrl(selectedProduct).href); showToast('Link copied. Send it to someone.'); }
   catch { showToast('Use the artwork link beside this button to copy or share the URL.'); }
 });
+$('#native-share').addEventListener('click',async()=>{
+  const result = await shareArtwork({title:`${selectedProduct.title} — Leo Lune`,text:'Something for your wall.',url:pageUrl(selectedProduct).href}, navigator);
+  if (result === 'failed' || result === 'unavailable') showToast('Sharing could not open. Use Copy link instead.');
+});
+$('#keep-browsing').addEventListener('click',()=>closeArtwork());
 function loadViewer() {
   $('#viewer-title').textContent = selectedProduct.title;
   $('#viewer-position').textContent = `${FEATURED_PRODUCTS.indexOf(selectedProduct) + 1} / ${PRODUCTS.length}`;
@@ -168,7 +178,15 @@ function triggerDownload(file) {
 }
 form.addEventListener('submit',async event=>{
   event.preventDefault(); const pennies = amount(); $('#form-status').textContent = '';
-  if (pennies === 0) { triggerDownload(selectedFile()); showToast('Downloading. Enjoy it.'); return; }
+  if (pennies === 0) {
+    triggerDownload(selectedFile());
+    $('#download-followup').hidden = false;
+    $('#keep-browsing').hidden = false;
+    $('#checkout-button').textContent = 'Download again';
+    $('#checkout-note').textContent = 'Not seeing it? Check Downloads, or try again.';
+    $('#download-followup').focus({preventScroll:true});
+    return;
+  }
   if (!Number.isSafeInteger(pennies) || pennies < 100 || pennies > 50000) { $('#form-status').textContent = 'Choose Free, or enter £1–£500.'; return; }
   if (!apiBaseUrl) { $('#form-status').textContent = 'Payments are not connected yet. Choose Free to download.'; return; }
   const intent = `${selectedProduct.id}:${selectedFile().id}:${pennies}`;

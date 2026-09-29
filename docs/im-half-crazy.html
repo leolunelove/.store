@@ -13,7 +13,7 @@
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="I&#39;m Half Crazy — Leo Lune"><meta name="twitter:description" content="I&#39;m Half Crazy by Leo Lune. Free original PNG download, 1080 × 1440 px. No sign-up."><meta name="twitter:image" content="https://leolune.store/preview-im-half-crazy.jpg">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="stylesheet" href="gallery.css?v=8">
-  <link rel="stylesheet" href="experience.css?v=10">
+  <link rel="stylesheet" href="experience.css?v=11">
 </head>
 <body>
   <a class="skip-link" href="#work">Skip to artwork</a>
@@ -39,7 +39,7 @@
       <section class="hero">
         <p class="eyebrow">LEO LUNE / STORE</p>
         <h1>Stuff I've made.</h1>
-        <div class="hero-bottom"><p class="intro">Download it. Print it. Put it up.</p><p class="hero-aside">FREE TO DOWNLOAD <span aria-hidden="true">↙</span></p></div>
+        <div class="hero-bottom"><p class="intro">Download it. Print it. Put it up.<span class="hero-support-copy">Free to download. <a id="hero-support" target="_blank" rel="noopener noreferrer" hidden>Chip in if you want <span aria-hidden="true">↗</span></a></span></p></div>
       </section>
       <section class="collection" id="work" aria-labelledby="collection-heading">
         <div class="section-heading">
@@ -66,7 +66,7 @@
       <p class="eyebrow">DIGITAL DOWNLOAD</p>
       <h2 id="dialog-title"></h2>
       <p class="dialog-note" id="dialog-note"></p>
-      <div class="artwork-tools"><button id="share-artwork" type="button">Copy link ↗</button><a id="artwork-permalink" href="./">Open artwork page ↗</a></div>
+      <div class="artwork-tools"><button id="native-share" type="button" hidden>Share ↗</button><button id="share-artwork" type="button">Copy link ↗</button><a id="artwork-permalink" href="./">Open artwork page ↗</a></div>
       <label class="file-choice" id="file-choice" hidden>File <select id="file-format" aria-label="Download file format"></select></label>
       <details class="usage-note"><summary>Use &amp; printing <span aria-hidden="true">+</span></summary><p>Print it for personal use. If you can, support the work by paying what it's worth to you.</p><p id="print-note"></p><a href="mailto:leolunedesign@gmail.com?subject=Artwork%20usage">Ask about other uses ↗</a></details>
       <form id="purchase-form">
@@ -79,7 +79,7 @@
         </fieldset>
         <p class="support-copy" id="support-copy">Pay what it's worth to you, if you can. Same file either way.</p>
         <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
-        <div class="download-action"><button class="primary-button" id="checkout-button" type="submit">Download for free</button><a class="support-link" id="support-link" target="_blank" rel="noopener noreferrer" hidden>Support the work ↗<span>Choose your amount · secure Stripe checkout</span></a><small id="checkout-note">Original file. No sign-up.</small></div>
+        <div class="download-action"><div class="download-followup" id="download-followup" tabindex="-1" role="status" hidden><h3>Enjoy it.</h3><p>Your download has been requested.</p></div><button class="primary-button" id="checkout-button" type="submit">Download for free</button><a class="support-link" id="support-link" target="_blank" rel="noopener noreferrer" hidden>Support the work ↗<span>Choose your amount · secure Stripe checkout</span></a><button class="keep-browsing" id="keep-browsing" type="button" hidden>Keep browsing ↗</button><small id="checkout-note">Original file. No sign-up.</small></div>
       </form>
     </div>
   </dialog>
@@ -90,6 +90,6 @@
     <div class="viewer-navigation"><button id="viewer-previous" aria-label="Previous artwork">← Previous</button><span id="viewer-position"></span><button id="viewer-next" aria-label="Next artwork">Next →</button></div>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="config.js?v=10"></script><script type="module" src="app.js?v=10"></script>
+  <script src="config.js?v=10"></script><script type="module" src="app.js?v=11"></script>
 </body>
 </html>

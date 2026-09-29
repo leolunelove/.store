@@ -22,3 +22,21 @@ body:has(dialog[open]){overflow:hidden}.toast{z-index:50;pointer-events:none}.no
 }
 @media(prefers-reduced-motion:reduce){.art-stage img{transition:none}}
 .support-link{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62px;margin-top:10px;padding:10px 14px;border:1px solid #424248;border-radius:12px;font-size:13px;transition:border-color .2s,background .2s}.support-link:hover{border-color:#95959a;background:#ffffff08}.support-link span{font-size:9px;color:#96969f;margin-top:3px}
+
+/* Artwork-first refinements, preserving the portfolio's dark rounded shell. */
+.site-header{height:76px}.sidebar{top:100px}main{padding-top:24px}
+.hero .eyebrow{margin-bottom:12px}.hero h1{font-size:clamp(38px,4vw,56px)}
+.hero-bottom{margin:12px 0 20px}.hero-support-copy{display:block;margin-top:4px;font-size:12px;color:#b5b5bb}
+#hero-support{display:inline-flex;align-items:center;gap:5px;min-height:32px;color:#eee;text-decoration:underline;text-underline-offset:4px;text-decoration-color:#777}
+#hero-support:hover{text-decoration-color:#fff}.section-heading{min-height:58px}
+.art-stage{aspect-ratio:.78;padding:40px 18px 18px}.art-stage img{width:100%;height:100%;max-height:100%;object-fit:contain}
+.edition{font-size:10px;top:14px;left:18px;color:#b5b5bd}.art-meta{gap:10px;margin-top:12px}.art-meta strong{font-size:15px}.art-meta .price strong{font-size:12px;color:#c9c9d0}
+.dialog-note,.artwork-tools,.usage-note,.support-copy{font-size:12px}.support-link span,.download-action small{font-size:11px;color:#b5b5bd}
+.download-followup{margin-bottom:16px}.download-followup h3{font-size:26px;letter-spacing:-.6px;font-weight:500;margin:0}.download-followup p{font-size:12px;color:#b5b5bd;margin:4px 0 0}
+.keep-browsing{display:block;min-height:44px;width:100%;margin-top:4px;font-size:12px;color:#ddd}
+@media(max-width:650px){
+ .site-header{height:66px}.sidebar{padding-top:12px}.categories{margin-bottom:8px}.sidebar .search{padding-top:0;padding-bottom:5px}main{padding-top:22px}
+ .hero .eyebrow{margin-bottom:10px}.hero h1{font-size:36px}.hero-bottom{margin-bottom:14px}.intro,.hero-support-copy{font-size:12px}.section-heading{min-height:52px}
+ .art-stage{padding:36px 10px 12px;aspect-ratio:.72}.edition{font-size:9px;top:13px;left:12px}.art-meta strong{font-size:13px}.art-meta .price strong{font-size:11px}
+ .download-action{position:static;box-shadow:none;padding-bottom:20px}.download-followup{margin-bottom:12px}.dialog-content{padding-top:20px}
+}
