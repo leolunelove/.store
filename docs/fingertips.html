@@ -13,7 +13,7 @@
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Fingertips — Leo Lune"><meta name="twitter:description" content="Fingertips by Leo Lune. Free original PNG download, 1080 × 1440 px. No sign-up."><meta name="twitter:image" content="https://leolune.store/share-fingertips.png">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="stylesheet" href="gallery.css?v=8">
-  <link rel="stylesheet" href="experience.css?v=14">
+  <link rel="stylesheet" href="experience.css?v=15">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
@@ -58,17 +58,14 @@
       <dialog class="purchase-dialog" id="purchase-dialog" open aria-labelledby="dialog-title">
     <button class="close-button" id="close-artwork" type="button" aria-label="Close artwork">×</button>
     <button class="dialog-art" id="open-viewer" type="button" aria-label="View artwork full screen">
-      <img id="dialog-image" src="preview-fingertips.jpg" alt="Fingertips" width="600" height="800"><span class="zoom-hint">View full size ↗</span>
+      <img id="dialog-image" src="preview-fingertips.jpg" alt="Fingertips" width="600" height="800"><span class="image-status" id="detail-image-status" role="status">Loading preview…</span><span class="zoom-hint">View full size ↗</span>
     </button>
     <div class="dialog-content">
       <a class="back-to-work" href="./">← All work</a>
       <p class="eyebrow">DIGITAL DOWNLOAD</p>
       <h1 id="dialog-title">Fingertips</h1>
-      <nav class="artwork-navigation" aria-label="Browse artwork"><button id="artwork-previous" type="button" aria-label="Previous artwork">← Previous</button><span id="artwork-position"></span><button id="artwork-next" type="button" aria-label="Next artwork">Next →</button></nav>
       <p class="dialog-note" id="dialog-note"></p>
-      <div class="artwork-tools"><button id="native-share" type="button" hidden>Share ↗</button><button id="share-artwork" type="button">Copy link ↗</button><a id="artwork-permalink" href="./">Open artwork page ↗</a></div>
       <label class="file-choice" id="file-choice" hidden>File <select id="file-format" aria-label="Download file format"></select></label>
-      <details class="usage-note"><summary>Use &amp; printing <span aria-hidden="true">+</span></summary><p>Print it for personal use. If you can, support the work by paying what it's worth to you.</p><p id="print-note"></p><a href="mailto:leolunedesign@gmail.com?subject=Artwork%20usage">Ask about other uses ↗</a></details>
       <form id="purchase-form">
         <fieldset id="amount-fieldset">
           <legend>Download free. Or chip in.</legend>
@@ -77,10 +74,14 @@
           </div>
           <label class="custom-amount" hidden><span>Amount in pounds · £1–£500</span><span class="currency-input"><span>£</span><input id="custom-amount" type="number" min="1" max="500" step="0.01" inputmode="decimal"></span></label>
         </fieldset>
-        <p class="support-copy" id="support-copy">Pay what it's worth to you, if you can. Same file either way.</p>
+        <p class="support-copy" id="support-copy">Free. Pay what it's worth to you.</p>
         <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
-        <div class="download-action"><div class="download-followup" id="download-followup" tabindex="-1" role="status" hidden><h3>Enjoy it.</h3><p>Your download has been requested.</p></div><button class="primary-button" id="checkout-button" type="submit">Download for free</button><a class="support-link" id="support-link" target="_blank" rel="noopener noreferrer" hidden>Support the work ↗<span>Choose your amount · secure Stripe checkout</span></a><button class="keep-browsing" id="keep-browsing" type="button" hidden>Keep browsing ↗</button><small id="checkout-note">Original file. No sign-up.</small></div>
+        <div class="download-action"><div class="download-followup" id="download-followup" tabindex="-1" role="status" hidden><h3>Enjoy it.</h3><p>Your download has been requested.</p></div><button class="primary-button" id="checkout-button" type="submit">Download PNG</button><a class="support-link" id="support-link" target="_blank" rel="noopener noreferrer" hidden>Support the work ↗</a><button class="keep-browsing" id="keep-browsing" type="button" hidden>Keep browsing ↗</button><small id="checkout-note"></small></div>
       </form>
+      <div class="artwork-tools"><button id="share-artwork" type="button">Share ↗</button><a id="artwork-permalink" href="./">Artwork page ↗</a></div>
+      <input id="share-url" aria-label="Artwork link — select and copy" readonly hidden>
+      <details class="usage-note"><summary>Use &amp; printing <span aria-hidden="true">+</span></summary><p>Print it for personal use.</p><p id="print-note"></p><a href="mailto:leolunedesign@gmail.com?subject=Artwork%20usage">Ask about other uses ↗</a></details>
+      <nav class="artwork-navigation" aria-label="Browse artwork"><button id="artwork-previous" type="button" aria-label="Previous artwork">← Previous</button><span id="artwork-position"></span><button id="artwork-next" type="button" aria-label="Next artwork">Next →</button></nav>
     </div>
   </dialog>
     </main>
@@ -95,6 +96,6 @@
     <div class="viewer-navigation"><button id="viewer-previous" aria-label="Previous artwork">← Previous</button><span id="viewer-position"></span><button id="viewer-next" aria-label="Next artwork">Next →</button></div>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="config.js?v=12"></script><script type="module" src="app.js?v=12"></script>
+  <script src="config.js?v=12"></script><script type="module" src="app.js?v=15"></script>
 </body>
 </html>

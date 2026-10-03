@@ -26,7 +26,7 @@ document.querySelectorAll('[data-count]').forEach(el => {
 });
 if (!apiBaseUrl) {
   $('#amount-fieldset').hidden = true;
-  $('#support-copy').textContent = supportPaymentLink ? "If it means something to you, pay what it's worth. Downloads stay free." : 'Optional support is coming soon. Downloads stay free.';
+  $('#support-copy').textContent = supportPaymentLink ? "Free. Pay what it's worth to you." : 'Free to download.';
 }
 if (supportPaymentLink && !apiBaseUrl) {
   $('#support-link').href = supportPaymentLink;
@@ -34,7 +34,26 @@ if (supportPaymentLink && !apiBaseUrl) {
   $('#hero-support').href = supportPaymentLink;
   $('#hero-support').hidden = false;
 }
-$('#native-share').hidden = typeof navigator.share !== 'function';
+function saveBrowseState() {
+  if (directEntry) return;
+  try { sessionStorage.setItem('leo-browse', JSON.stringify({category,query:$('#search').value,savedOnly,sort:$('#sort').value,twoColumns:$('#art-grid').classList.contains('two-columns'),scroll:window.scrollY})); } catch {}
+}
+let browseState;
+try { browseState=JSON.parse(sessionStorage.getItem('leo-browse') || 'null'); } catch {}
+if (browseState && typeof browseState === 'object' && (directEntry || new URLSearchParams(location.search).has('resume'))) {
+  category=['all','type','photo'].includes(browseState.category)?browseState.category:'all';
+  savedOnly=browseState.savedOnly===true;
+  $('#search').value=typeof browseState.query==='string'?browseState.query.slice(0,200):'';
+  $('#sort').value=browseState.sort==='title'?'title':'curated';
+  $('#art-grid').classList.toggle('two-columns',browseState.twoColumns===true);
+  document.querySelectorAll('[data-filter]').forEach(b=>{b.classList.toggle('active',b.dataset.filter===category);b.setAttribute('aria-pressed',String(b.dataset.filter===category));});
+  document.querySelectorAll('[data-columns]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.columns===(browseState.twoColumns?'2':'3'))));
+  const collection=currentCollection();
+  if (collection.some(p=>p.id===document.body.dataset.artwork)) browsingProducts=collection;
+}
+const returnUrl=new URL('?resume=1',rootUrl);
+$('.back-to-work').href=returnUrl;
+window.addEventListener('pagehide',saveBrowseState);
 $('#support-link').addEventListener('click',()=>track('support_click',selectedProduct?.id));
 $('#hero-support').addEventListener('click',()=>track('support_click'));
 function showToast(message) {
@@ -57,10 +76,15 @@ function renderCollection() {
     <article class="art-card">
       <button class="save-art" data-save="${p.id}-digital" title="${saved.has(`${p.id}-digital`) ? 'Remove from saved' : 'Save artwork'}" aria-label="${saved.has(`${p.id}-digital`) ? 'Unsave' : 'Save'} ${p.title}" aria-pressed="${saved.has(`${p.id}-digital`)}">${bookmark}</button>
       <a class="art-open" href="${p.page}" data-product="${p.id}" aria-label="View ${p.title}">
-        <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 640w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
+        <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><span class="image-status" role="status">Loading preview…</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 640w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
         <span class="art-meta"><span><strong>${p.title}</strong></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong></span></span>
-      </a>
+      </a><button class="retry-preview" data-retry="${p.id}" hidden>Retry preview</button>
     </article>`).join('');
+  document.querySelectorAll('.art-stage img').forEach(img=>{
+    const stage=img.closest('.art-stage'), retry=img.closest('.art-card').querySelector('[data-retry]');
+    const update=()=>{const okay=img.naturalWidth>0;stage.classList.toggle('image-error',!okay);stage.querySelector('.image-status').hidden=okay;stage.querySelector('.image-status').textContent=okay?'':'Preview unavailable';retry.hidden=okay;};
+    img.addEventListener('load',update);img.addEventListener('error',update);if(img.complete)update();
+  });
 }
 document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{
   category = button.dataset.filter;
@@ -76,6 +100,8 @@ document.querySelectorAll('[data-columns]').forEach(button=>button.addEventListe
   document.querySelectorAll('[data-columns]').forEach(b=>b.setAttribute('aria-pressed', String(b === button)));
 }));
 $('#art-grid').addEventListener('click', event=>{
+  const retry=event.target.closest('[data-retry]');
+  if(retry){const img=retry.closest('.art-card').querySelector('img');retry.hidden=true;img.closest('.art-stage').classList.remove('image-error');img.closest('.art-stage').querySelector('.image-status').textContent='Loading preview…';img.removeAttribute('srcset');img.src=new URL(PRODUCTS.find(p=>p.id===retry.dataset.retry).preview,rootUrl).href+'?retry='+Date.now();return;}
   const save = event.target.closest('[data-save]');
   if (save) {
     const key = save.dataset.save;
@@ -88,7 +114,7 @@ $('#art-grid').addEventListener('click', event=>{
   }
   const link = event.target.closest('[data-product]');
   if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-  event.preventDefault(); browsingProducts = currentCollection(); opener = link.dataset.product; openArtwork(link.dataset.product, true);
+  event.preventDefault(); saveBrowseState(); browsingProducts = currentCollection(); opener = link.dataset.product; openArtwork(link.dataset.product, true);
 });
 function pageUrl(product) { return new URL(product.page, rootUrl); }
 function selectedFile() { return fileOptions(selectedProduct).find(f=>f.id === $('#file-format').value) || fileOptions(selectedProduct)[0]; }
@@ -98,11 +124,16 @@ function openArtwork(id, updateHistory = false) {
   checkoutAbort?.abort(); selectedProduct = product;
   if (lastViewedId !== id) { track('artwork_view', id); lastViewedId = id; }
   $('#artwork-position').textContent = `${browsingProducts.findIndex(p=>p.id === id) + 1} / ${browsingProducts.length}`;
+  const next=adjacentArtwork(browsingProducts,id,1);
+  $('#artwork-next').textContent=next?`${next.title} →`:'Next →';
+  $('#share-url').hidden=true;
   for (const selector of ['#artwork-previous','#artwork-next','#viewer-previous','#viewer-next']) $(selector).disabled = browsingProducts.length < 2;
   $('#download-followup').hidden = true;
   $('#keep-browsing').hidden = true;
   $('#dialog-title').textContent = product.title;
+  $('#detail-image-status').hidden=false;$('#detail-image-status').textContent='Loading preview…';$('#open-viewer').classList.remove('image-error');
   $('#dialog-image').src = new URL(product.preview, rootUrl); $('#dialog-image').alt = product.title;
+  if ($('#dialog-image').complete) updateDetailPreview();
   $('#dialog-note').textContent = `Original PNG · ${product.width} × ${product.height} px · 3:4`;
   $('#print-note').textContent = product.printFile ? 'A larger print master is included. Pick it from the file menu.' : printGuide(product);
   $('#artwork-permalink').href = pageUrl(product);
@@ -114,7 +145,7 @@ function openArtwork(id, updateHistory = false) {
   if (!dialog.open) directEntry ? dialog.show() : dialog.showModal();
 }
 function closeArtwork(updateHistory = true) {
-  if (directEntry) { location.assign(rootUrl.href); return; }
+  if (directEntry) { location.assign(returnUrl.href); return; }
   checkoutAbort?.abort();
   if (viewer.open) viewer.close();
   if (dialog.open) dialog.close();
@@ -139,12 +170,10 @@ function routeFromLocation() {
 }
 window.addEventListener('popstate', routeFromLocation);
 $('#share-artwork').addEventListener('click',async()=>{
+  const result=await shareArtwork({title:`${selectedProduct.title} — Leo Lune`,url:pageUrl(selectedProduct).href},navigator);
+  if(result==='shared'||result==='cancelled')return;
   try { await navigator.clipboard.writeText(pageUrl(selectedProduct).href); showToast('Link copied. Send it to someone.'); }
-  catch { showToast('Use the artwork link beside this button to copy or share the URL.'); }
-});
-$('#native-share').addEventListener('click',async()=>{
-  const result = await shareArtwork({title:`${selectedProduct.title} — Leo Lune`,text:'Something for your wall.',url:pageUrl(selectedProduct).href}, navigator);
-  if (result === 'failed' || result === 'unavailable') showToast('Sharing could not open. Use Copy link instead.');
+  catch { $('#share-url').value=pageUrl(selectedProduct).href;$('#share-url').hidden=false;$('#share-url').select();showToast('Select and copy this link.'); }
 });
 $('#keep-browsing').addEventListener('click',()=>closeArtwork());
 function loadViewer() {
@@ -156,7 +185,10 @@ function loadViewer() {
 }
 $('#viewer-image').addEventListener('load',()=>$('#viewer-status').hidden = true);
 $('#viewer-image').addEventListener('error',()=>$('#viewer-status').textContent = 'Could not load the original. Close and try again.');
-$('#open-viewer').addEventListener('click',()=>{ loadViewer(); viewer.showModal(); });
+const detailPreview=$('#dialog-image');
+function updateDetailPreview(){const okay=detailPreview.naturalWidth>0;$('#detail-image-status').hidden=okay;$('#detail-image-status').textContent=okay?'':'Preview unavailable · tap to retry';$('#open-viewer').classList.toggle('image-error',!okay);$('#open-viewer').setAttribute('aria-label',okay?'View artwork full screen':'Retry artwork preview');}
+detailPreview.addEventListener('load',updateDetailPreview);detailPreview.addEventListener('error',updateDetailPreview);
+$('#open-viewer').addEventListener('click',()=>{if($('#open-viewer').classList.contains('image-error')){$('#detail-image-status').textContent='Loading preview…';detailPreview.src=new URL(selectedProduct.preview,rootUrl).href+'?retry='+Date.now();return;}loadViewer(); viewer.showModal(); });
 $('#close-viewer').addEventListener('click',()=>viewer.close());
 $('#viewer-zoom').addEventListener('click',()=>{
   const zoomed = $('#viewer-canvas').classList.toggle('zoomed');
@@ -186,8 +218,8 @@ function chooseAmount(value) {
 function amount() { return selectedAmount ?? amountInPennies($('#custom-amount').value); }
 function updateButton() {
   const pennies = amount();
-  $('#checkout-button').textContent = pennies === 0 ? 'Download for free' : pennies === null ? 'Enter an amount' : `Pay £${(pennies/100).toFixed(pennies % 100 ? 2 : 0)} & download`;
-  $('#checkout-note').textContent = pennies === 0 ? 'Original file. No sign-up.' : 'Secure checkout with Stripe.';
+  $('#checkout-button').textContent = pennies === 0 ? 'Download PNG' : pennies === null ? 'Enter an amount' : `Pay £${(pennies/100).toFixed(pennies % 100 ? 2 : 0)} & download`;
+  $('#checkout-note').textContent = pennies === 0 ? '' : 'Secure checkout with Stripe.';
 }
 document.querySelectorAll('[data-amount]').forEach(b=>b.addEventListener('click',()=>chooseAmount(b.dataset.amount)));
 $('#custom-amount').addEventListener('input',updateButton);
@@ -242,7 +274,9 @@ async function handleCheckoutReturn() {
     openArtwork(product.id);
     const file = fileOptions(product).find(f=>f.id === data.format);
     if (!file) throw new Error('File could not be found.');
-    triggerDownload(file); showToast('Thanks for the support. If the download did not start, tap Download for free.'); history.replaceState({},'',pageUrl(product));
+    triggerDownload(file); showToast('Thanks for the support. If the download did not start, tap Download PNG.'); history.replaceState({},'',pageUrl(product));
   } catch(error) { showToast(error.message || 'Could not confirm payment. Refresh to retry.'); }
 }
 renderCollection(); routeFromLocation(); handleCheckoutReturn();
+if(detailPreview.complete&&detailPreview.getAttribute('src'))updateDetailPreview();
+if(!directEntry&&new URLSearchParams(location.search).has('resume')&&Number.isFinite(browseState?.scroll))requestAnimationFrame(()=>window.scrollTo({top:Math.max(0,browseState.scroll),behavior:'instant'}));
