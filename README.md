@@ -7,7 +7,7 @@ The alternative Vercel payment backend is **not connected** and is not productio
 ## What is included
 
 - Twelve original 1080×1440 PNG files, preserved unchanged in `docs/downloads/`.
-- Responsive 320px and 960px JPEG previews; original files load only for full-size viewing or downloads. Originals are not upscaled.
+- Responsive 320px, 640px and 960px JPEG previews; the browser selects an appropriate size. Original files load only for full-size viewing or downloads. Originals are not upscaled.
 - Individual artwork HTML pages with canonical URLs, Open Graph/Twitter metadata, a sitemap and a no-JavaScript download fallback.
 - Full-screen original viewer, zoom, keyboard navigation and meaningful category filters. No bookmarking or shareable filter URLs.
 - Free-first downloads with a separate optional “Support the work” link. The custom API remains disabled.
@@ -22,6 +22,8 @@ Change the reusable page markup in `scripts/store-template.html`; don't edit gen
 npm run build:pages
 npm test
 ```
+
+`npm run check:pages` also checks all artwork files, preview paths, PNG dimensions, local page links and accidental private keys in public files. The Pages workflow runs this validation before deploying; enable **GitHub Actions** as the repository Pages source. Failed checks stop publication. Mobile layout is checked with a browser viewport; a physical-phone payment-wallet check is still a separate manual check.
 
 On macOS, export the lightweight previews from unchanged originals:
 

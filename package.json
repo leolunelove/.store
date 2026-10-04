@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
+    "check:pages": "node scripts/build-store.mjs && node --test && node scripts/check-pages.mjs",
     "build:pages": "node scripts/build-store.mjs",
     "build:previews": "node scripts/build-store.mjs --previews",
     "build:social": "node scripts/build-social.mjs",
