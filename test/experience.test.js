@@ -22,7 +22,7 @@ test('all generated pages include optional support and download follow-up contro
   for(const page of ['index.html',...PRODUCTS.map(p=>p.page)]) {
     const html=await readFile(new URL(`../docs/${page}`,import.meta.url),'utf8');
     for(const id of ['hero-support','share-artwork','download-followup','keep-browsing']) assert.ok(html.includes(`id="${id}"`));
-    assert.ok(html.includes('app.js?v=16'));
+    assert.ok(html.includes('app.js?v=17'));
   }
 });
 test('support checkout permits only live HTTPS Stripe payment links',()=>{
