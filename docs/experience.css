@@ -65,6 +65,7 @@ body:has(#contact-dialog[open]),body.artwork-page:has(#contact-dialog[open]){ove
 .dialog-note{color:#b5b5bd}.print-size{margin-top:0}
 .edition,.section-heading h2 span,.view-controls button{color:#b5b5bd}
 .categories button,.view-controls button,.search input,.clear-search,#hero-support{min-height:44px}
+.view-controls button{width:44px}.retry-preview{min-height:44px}
 .search input{font-size:16px}
 button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #eee;outline-offset:4px}
 .viewer-feedback{position:absolute;top:20px;left:50%;transform:translateX(-50%);text-align:center;max-width:calc(100% - 32px)}
