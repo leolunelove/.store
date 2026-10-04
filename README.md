@@ -7,9 +7,9 @@ The alternative Vercel payment backend is **not connected** and is not productio
 ## What is included
 
 - Twelve original 1080×1440 PNG files, preserved unchanged in `docs/downloads/`.
-- Smaller 320px and 640px JPEG previews; original files load only for full-size viewing or downloads.
+- Responsive 320px and 960px JPEG previews; original files load only for full-size viewing or downloads. Originals are not upscaled.
 - Individual artwork HTML pages with canonical URLs, Open Graph/Twitter metadata, a sitemap and a no-JavaScript download fallback.
-- Full-screen original viewer, zoom, keyboard navigation, meaningful category filters and saved work stored only on the visitor's device.
+- Full-screen original viewer, zoom, keyboard navigation and meaningful category filters. No bookmarking or shareable filter URLs.
 - Free-first downloads with a separate optional “Support the work” link. The custom API remains disabled.
 - A server-controlled Stripe Checkout flow with strict product/file validation, GBP amount bounds, retry idempotency and payment verification.
 
@@ -60,6 +60,16 @@ Open `http://localhost:4173/`. For local API testing, `npm install` then `npm ru
 Hosted Stripe Checkout keeps card entry outside the store. Card payment methods can include Apple Pay on supported devices when enabled for the Stripe account. No Stripe secret or publishable key is required in the frontend.
 
 ## Security and operations
+
+## Ask Leo contact receiver
+
+The on-site enquiry dialog includes a copyable email address. `contactEndpoint` remains empty until the Worker is deployed and email delivery tested; the form never reports a false success.
+
+Deploy `worker/contact.js` with `wrangler.jsonc` to Cloudflare Workers. Set `RESEND_API_KEY` as a private Worker secret, restricted to sending from the verified `leolune.fun` domain. No secret is committed. The recipient is fixed to Leo's contact address; visitors become Reply-To, not From. The receiver validates input, restricts the website origin, checks a honeypot and limits each IP to three requests per minute. Retries reuse a Resend idempotency key. Personal message bodies are not logged. There is no marketing subscription or visitor auto-reply.
+
+After a real delivery check, set `docs/config.js` `contactEndpoint` to `https://<worker-host>/contact` and publish Pages. This contact backend is separate from the unconnected payment API.
+
+## Payment security
 
 - API origins, product IDs, formats and amounts are validated server-side. Support amounts are whole pennies from £1 to £500.
 - Checkout Session creation uses Stripe idempotency keys for retries. Success-page URLs alone never establish payment.

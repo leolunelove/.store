@@ -7,10 +7,12 @@
     "test": "node --test",
     "build:pages": "node scripts/build-store.mjs",
     "build:previews": "node scripts/build-store.mjs --previews",
+    "build:social": "node scripts/build-social.mjs",
     "dev": "vercel dev"
   },
   "devDependencies": {
-    "vercel": "^46.1.1"
+    "vercel": "^46.1.1",
+    "sharp": "^0.34.3"
   },
   "engines": {
     "node": ">=20"
