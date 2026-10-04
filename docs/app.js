@@ -1,24 +1,46 @@
 import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=12';
-import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, shareArtwork, adjacentArtwork } from './store-utils.js?v=12';
+import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, shareArtwork, adjacentArtwork } from './store-utils.js?v=16';
 import { createTracker } from './analytics.js?v=12';
 const $ = selector => document.querySelector(selector);
 const apiBaseUrl = String(window.LEO_LUNE_CONFIG?.apiBaseUrl || '').replace(/\/$/, '');
 const supportPaymentLink = liveSupportLink(window.LEO_LUNE_CONFIG?.supportPaymentLink);
+const contactDialog = $('#contact-dialog'), contactForm = $('#contact-form');
+const contactEndpoint = String(window.LEO_LUNE_CONFIG?.contactEndpoint || '');
+let contactId = '', contactPayload = '';
+document.querySelectorAll('[data-ask-leo]').forEach(button=>button.addEventListener('click',()=>{
+  $('#contact-artwork').value = dialog.open && selectedProduct ? selectedProduct.title : 'General enquiry';
+  $('#contact-status').textContent = contactEndpoint ? '' : 'The form is being connected. For now, copy my email below.';
+  $('#send-contact').disabled = !contactEndpoint;
+  contactDialog.showModal();
+}));
+$('#close-contact').addEventListener('click',()=>contactDialog.close());
+$('#copy-email').addEventListener('click',async()=>{
+  try { await navigator.clipboard.writeText($('#contact-email').value); $('#contact-status').textContent='Email copied.'; }
+  catch { $('#contact-email').select(); $('#contact-status').textContent='Select and copy my email.'; }
+});
+contactForm.addEventListener('submit',async event=>{
+  event.preventDefault(); if (!contactEndpoint || !contactForm.reportValidity()) return;
+  const data=Object.fromEntries(new FormData(contactForm));
+  const payload=JSON.stringify(data);
+  if (payload!==contactPayload) { contactId=crypto.randomUUID(); contactPayload=payload; }
+  $('#send-contact').disabled=true; $('#contact-status').textContent='Sending…';
+  try {
+    const response=await fetch(contactEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,requestId:contactId}),signal:AbortSignal.timeout(15000)});
+    if (!response.ok) throw new Error(response.status===429?'Too many attempts. Give it a minute, then try again.':'Could not send. Try again, or copy my email below.');
+    $('#contact-status').textContent="Sent. I'll reply to your email.";
+    contactForm.elements.message.value=''; contactId=''; contactPayload='';
+  } catch(error) { $('#contact-status').textContent=error.name==='TimeoutError'?'Sending timed out. Retry safely, or copy my email below.':error.message; }
+  finally { $('#send-contact').disabled=false; }
+});
 const rootUrl = new URL('./', document.baseURI);
 const dialog = $('#purchase-dialog'), viewer = $('#art-viewer'), form = $('#purchase-form');
 const directEntry = Boolean(document.body.dataset.artwork);
 const track = createTracker(window.LEO_LUNE_CONFIG?.analyticsEndpoint);
 let browsingProducts = FEATURED_PRODUCTS;
 let lastViewedId = null;
-const bookmark = '<svg viewBox="0 0 16 20" width="14" height="18" fill="none" aria-hidden="true"><path d="M2 1h12v17l-6-4-6 4Z" stroke="currentColor" stroke-width="1.5"/></svg>';
-function currentCollection() { return filterProducts(FEATURED_PRODUCTS, { category, query: $('#search').value, savedOnly, saved, sort: $('#sort').value }); }
-let selectedProduct = null, selectedAmount = 0, category = 'all', savedOnly = false;
+function currentCollection() { return filterProducts(FEATURED_PRODUCTS, { category, query: $('#search').value, sort: $('#sort').value }); }
+let selectedProduct = null, selectedAmount = 0, category = 'all';
 let toastTimer, checkoutAbort, checkoutIntent = '', requestId = '', opener;
-let saved;
-try {
-  const values = JSON.parse(localStorage.getItem('leo-lune-saved') || '[]');
-  saved = new Set(Array.isArray(values) ? values.filter(v => typeof v === 'string') : []);
-} catch { saved = new Set(); }
 $('#year').textContent = new Date().getFullYear();
 $('#catalog-count').textContent = `${PRODUCTS.length} PIECES`;
 document.querySelectorAll('[data-count]').forEach(el => {
@@ -36,13 +58,12 @@ if (supportPaymentLink && !apiBaseUrl) {
 }
 function saveBrowseState() {
   if (directEntry) return;
-  try { sessionStorage.setItem('leo-browse', JSON.stringify({category,query:$('#search').value,savedOnly,sort:$('#sort').value,twoColumns:$('#art-grid').classList.contains('two-columns'),scroll:window.scrollY})); } catch {}
+  try { sessionStorage.setItem('leo-browse', JSON.stringify({category,query:$('#search').value,sort:$('#sort').value,twoColumns:$('#art-grid').classList.contains('two-columns'),scroll:window.scrollY})); } catch {}
 }
 let browseState;
 try { browseState=JSON.parse(sessionStorage.getItem('leo-browse') || 'null'); } catch {}
 if (browseState && typeof browseState === 'object' && (directEntry || new URLSearchParams(location.search).has('resume'))) {
   category=['all','type','photo'].includes(browseState.category)?browseState.category:'all';
-  savedOnly=browseState.savedOnly===true;
   $('#search').value=typeof browseState.query==='string'?browseState.query.slice(0,200):'';
   $('#sort').value=browseState.sort==='title'?'title':'curated';
   $('#art-grid').classList.toggle('two-columns',browseState.twoColumns===true);
@@ -66,17 +87,14 @@ function showToast(message) {
 }
 function renderCollection() {
   const visible = currentCollection();
-  const label = savedOnly ? 'Saved work' : {all:'All work', type:'Type-led', photo:'Photo-led'}[category];
+  const label = {all:'All work', type:'Type-led', photo:'Photo-led'}[category];
   $('#collection-heading').innerHTML = `${label} <span>${String(visible.length).padStart(2,'0')}</span>`;
-  $('#saved-count').textContent = String(PRODUCTS.filter(p=>saved.has(`${p.id}-digital`)).length).padStart(2,'0');
-  $('#saved-toggle').setAttribute('aria-pressed', String(savedOnly));
   $('#empty-state').hidden = visible.length > 0;
-  $('#empty-message').textContent = savedOnly ? 'No matches in your saved work. Use the bookmark on a piece to save it.' : 'No matches. Try another filter.';
+  $('#empty-message').textContent = 'No matches. Try another filter.';
   $('#art-grid').innerHTML = visible.map((p, index) => `
     <article class="art-card">
-      <button class="save-art" data-save="${p.id}-digital" title="${saved.has(`${p.id}-digital`) ? 'Remove from saved' : 'Save artwork'}" aria-label="${saved.has(`${p.id}-digital`) ? 'Unsave' : 'Save'} ${p.title}" aria-pressed="${saved.has(`${p.id}-digital`)}">${bookmark}</button>
       <a class="art-open" href="${p.page}" data-product="${p.id}" aria-label="View ${p.title}">
-        <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><span class="image-status" role="status">Loading preview…</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 640w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
+        <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><span class="image-status" role="status">Loading preview…</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 960w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
         <span class="art-meta"><span><strong>${p.title}</strong></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong></span></span>
       </a><button class="retry-preview" data-retry="${p.id}" hidden>Retry preview</button>
     </article>`).join('');
@@ -93,8 +111,7 @@ document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListen
 }));
 $('#search').addEventListener('input', renderCollection);
 $('#sort').addEventListener('change', renderCollection);
-$('#saved-toggle').addEventListener('click',()=>{ savedOnly = !savedOnly; renderCollection(); });
-$('#reset-filters').addEventListener('click',()=>{ $('#search').value = ''; savedOnly = false; $('[data-filter="all"]').click(); });
+$('#reset-filters').addEventListener('click',()=>{ $('#search').value = ''; $('[data-filter="all"]').click(); });
 document.querySelectorAll('[data-columns]').forEach(button=>button.addEventListener('click',()=>{
   $('#art-grid').classList.toggle('two-columns', button.dataset.columns === '2');
   document.querySelectorAll('[data-columns]').forEach(b=>b.setAttribute('aria-pressed', String(b === button)));
@@ -102,16 +119,6 @@ document.querySelectorAll('[data-columns]').forEach(button=>button.addEventListe
 $('#art-grid').addEventListener('click', event=>{
   const retry=event.target.closest('[data-retry]');
   if(retry){const img=retry.closest('.art-card').querySelector('img');retry.hidden=true;img.closest('.art-stage').classList.remove('image-error');img.closest('.art-stage').querySelector('.image-status').textContent='Loading preview…';img.removeAttribute('srcset');img.src=new URL(PRODUCTS.find(p=>p.id===retry.dataset.retry).preview,rootUrl).href+'?retry='+Date.now();return;}
-  const save = event.target.closest('[data-save]');
-  if (save) {
-    const key = save.dataset.save;
-    saved.has(key) ? saved.delete(key) : saved.add(key);
-    try { localStorage.setItem('leo-lune-saved', JSON.stringify([...saved])); } catch {}
-    renderCollection();
-    showToast(saved.has(key) ? 'Saved on this device.' : 'Removed from saved.');
-    document.querySelector(`[data-save="${key}"]`)?.focus({preventScroll:true});
-    return;
-  }
   const link = event.target.closest('[data-product]');
   if (!link || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
   event.preventDefault(); saveBrowseState(); browsingProducts = currentCollection(); opener = link.dataset.product; openArtwork(link.dataset.product, true);
