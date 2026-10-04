@@ -26,7 +26,7 @@ export default {
     const text=await request.text();
     if (text.length>6000) return reply(413,'Message too large.');
     let data; try { data=JSON.parse(text); } catch { return reply(400,'Invalid message.'); }
-    if (data.website) return reply(400,'Invalid message.');
+    if (data?.website) return reply(400,'Invalid message.');
     const enquiry=validateEnquiry(data); if (!enquiry) return reply(400,'Check your email and message.');
     const {success}=await env.CONTACT_RATE_LIMIT.limit({key:request.headers.get('CF-Connecting-IP')||'unknown'});
     if (!success) return reply(429,'Try again in a minute.');
