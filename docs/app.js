@@ -1,5 +1,5 @@
 import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=17';
-import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, shareArtwork, adjacentArtwork } from './store-utils.js?v=16';
+import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, printSize, shareArtwork, adjacentArtwork } from './store-utils.js?v=19';
 import { createTracker } from './analytics.js?v=12';
 const $ = selector => document.querySelector(selector);
 const apiBaseUrl = String(window.LEO_LUNE_CONFIG?.apiBaseUrl || '').replace(/\/$/, '');
@@ -101,7 +101,7 @@ function renderCollection() {
     <article class="art-card">
       <a class="art-open" href="${p.page}" data-product="${p.id}" aria-label="View ${p.title}">
         <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><span class="image-status" role="status">Loading preview…</span><img src="${p.previewMedium}" srcset="${p.previewSmall} 320w, ${p.previewMedium} 640w, ${p.preview} 960w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
-        <span class="art-meta"><span><strong>${p.title}</strong></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong></span></span>
+        <span class="art-meta"><span><strong>${p.title}</strong></span><span class="art-link-arrow" aria-hidden="true">↗</span></span>
       </a><button class="retry-preview" data-retry="${p.id}" hidden>Retry preview</button>
     </article>`).join('');
   document.querySelectorAll('.art-stage img').forEach(img=>{
@@ -152,7 +152,7 @@ function openArtwork(id, updateHistory = false) {
   $('#dialog-image').alt = product.title;
   if ($('#dialog-image').complete) updateDetailPreview();
   $('#dialog-note').textContent = `Original PNG · ${product.width} × ${product.height} px · 3:4`;
-  $('#print-size').textContent = printGuide(product);
+  $('#print-size').textContent = printSize(product);
   $('#print-note').textContent = product.printFile ? 'A larger print master is included. Pick it from the file menu.' : printGuide(product);
   $('#artwork-permalink').href = pageUrl(product);
   $('#file-format').innerHTML = fileOptions(product).map(f=>`<option value="${f.id}">${f.label}</option>`).join('');
@@ -198,11 +198,14 @@ function loadViewer() {
   $('#viewer-title').textContent = selectedProduct.title;
   $('#viewer-position').textContent = `${browsingProducts.indexOf(selectedProduct) + 1} / ${browsingProducts.length}`;
   $('#viewer-status').hidden = false; $('#viewer-status').textContent = 'Loading original…';
+  $('#viewer-retry').hidden=true;
+  $('#viewer-swipe-hint').hidden=browsingProducts.length<2;
   $('#viewer-image').alt = selectedProduct.title; $('#viewer-image').src = new URL(selectedProduct.image, rootUrl);
   $('#viewer-canvas').classList.remove('zoomed'); $('#viewer-zoom').setAttribute('aria-pressed', 'false'); $('#viewer-zoom').textContent = 'Zoom in';
 }
 $('#viewer-image').addEventListener('load',()=>$('#viewer-status').hidden = true);
-$('#viewer-image').addEventListener('error',()=>$('#viewer-status').textContent = 'Could not load the original. Close and try again.');
+$('#viewer-image').addEventListener('error',()=>{ $('#viewer-status').textContent = 'Could not load the original.'; $('#viewer-retry').hidden=false; });
+$('#viewer-retry').addEventListener('click',()=>{ $('#viewer-status').textContent='Loading original…'; $('#viewer-retry').hidden=true; $('#viewer-image').src=new URL(selectedProduct.image,rootUrl).href+'?retry='+Date.now(); });
 const detailPreview=$('#dialog-image');
 function updateDetailPreview(){const okay=detailPreview.naturalWidth>0;$('#detail-image-status').hidden=okay;$('#detail-image-status').textContent=okay?'':'Preview unavailable · tap to retry';$('#open-viewer').classList.toggle('image-error',!okay);$('#open-viewer').setAttribute('aria-label',okay?'View artwork full screen':'Retry artwork preview');}
 detailPreview.addEventListener('load',updateDetailPreview);detailPreview.addEventListener('error',updateDetailPreview);
@@ -210,6 +213,7 @@ $('#open-viewer').addEventListener('click',()=>{if($('#open-viewer').classList.c
 $('#close-viewer').addEventListener('click',()=>viewer.close());
 $('#viewer-zoom').addEventListener('click',()=>{
   const zoomed = $('#viewer-canvas').classList.toggle('zoomed');
+  $('#viewer-swipe-hint').hidden=zoomed || browsingProducts.length<2;
   $('#viewer-zoom').setAttribute('aria-pressed', String(zoomed)); $('#viewer-zoom').textContent = zoomed ? 'Fit to screen' : 'Zoom in';
 });
 function moveViewer(delta) {

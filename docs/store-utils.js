@@ -8,6 +8,9 @@ export function printGuide(product) {
   const cm = pixels => (pixels / 300 * 2.54).toFixed(1);
   return `For a small print: about ${cm(product.width)} × ${cm(product.height)} cm at 300 ppi. Larger prints will look softer. This isn't a large-poster file.`;
 }
+export function printSize(product) {
+  return `Small print: ${Math.round(product.width / 300 * 2.54)} × ${Math.round(product.height / 300 * 2.54)} cm`;
+}
 export async function shareArtwork(data, browserNavigator) {
   if (!browserNavigator.share) return 'unavailable';
   try { await browserNavigator.share(data); return 'shared'; }
