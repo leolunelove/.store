@@ -33,6 +33,7 @@ export const PRODUCTS = [
   image: `downloads/${encodeURIComponent(product.file)}`,
   preview: `preview-${product.id}.jpg`,
   previewSmall: `preview-${product.id}-small.jpg`,
+  previewMedium: `preview-${product.id}-medium.jpg`,
   page: `${product.id}.html`,
   width: 1080,
   height: 1440,

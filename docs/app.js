@@ -1,4 +1,4 @@
-import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=12';
+import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=17';
 import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, shareArtwork, adjacentArtwork } from './store-utils.js?v=16';
 import { createTracker } from './analytics.js?v=12';
 const $ = selector => document.querySelector(selector);
@@ -27,6 +27,7 @@ contactForm.addEventListener('submit',async event=>{
   try {
     const response=await fetch(contactEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data,requestId:contactId}),signal:AbortSignal.timeout(15000)});
     if (!response.ok) throw new Error(response.status===429?'Too many attempts. Give it a minute, then try again.':'Could not send. Try again, or copy my email below.');
+    if ((await response.json()).sent !== true) throw new Error('Could not confirm sending. Retry safely, or copy my email below.');
     $('#contact-status').textContent="Sent. I'll reply to your email.";
     contactForm.elements.message.value=''; contactId=''; contactPayload='';
   } catch(error) { $('#contact-status').textContent=error.name==='TimeoutError'?'Sending timed out. Retry safely, or copy my email below.':error.message; }
@@ -56,6 +57,7 @@ if (supportPaymentLink && !apiBaseUrl) {
   $('#hero-support').href = supportPaymentLink;
   $('#hero-support').hidden = false;
 }
+$('#stripe-support-note').hidden = !supportPaymentLink || Boolean(apiBaseUrl);
 function saveBrowseState() {
   if (directEntry) return;
   try { sessionStorage.setItem('leo-browse', JSON.stringify({category,query:$('#search').value,sort:$('#sort').value,twoColumns:$('#art-grid').classList.contains('two-columns'),scroll:window.scrollY})); } catch {}
@@ -94,7 +96,7 @@ function renderCollection() {
   $('#art-grid').innerHTML = visible.map((p, index) => `
     <article class="art-card">
       <a class="art-open" href="${p.page}" data-product="${p.id}" aria-label="View ${p.title}">
-        <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><span class="image-status" role="status">Loading preview…</span><img src="${p.preview}" srcset="${p.previewSmall} 320w, ${p.preview} 960w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
+        <span class="art-stage"><span class="edition" aria-hidden="true">${p.number}</span><span class="image-status" role="status">Loading preview…</span><img src="${p.previewMedium}" srcset="${p.previewSmall} 320w, ${p.previewMedium} 640w, ${p.preview} 960w" sizes="(max-width:650px) 44vw, 32vw" alt="${p.title}, digital artwork" loading="${index < 3 ? 'eager' : 'lazy'}" decoding="async" width="${p.width}" height="${p.height}"></span>
         <span class="art-meta"><span><strong>${p.title}</strong></span><span class="price"><strong>Free download <span aria-hidden="true">↙</span></strong></span></span>
       </a><button class="retry-preview" data-retry="${p.id}" hidden>Retry preview</button>
     </article>`).join('');
@@ -139,7 +141,10 @@ function openArtwork(id, updateHistory = false) {
   $('#keep-browsing').hidden = true;
   $('#dialog-title').textContent = product.title;
   $('#detail-image-status').hidden=false;$('#detail-image-status').textContent='Loading preview…';$('#open-viewer').classList.remove('image-error');
-  $('#dialog-image').src = new URL(product.preview, rootUrl); $('#dialog-image').alt = product.title;
+  $('#dialog-image').src = new URL(product.preview, rootUrl);
+  $('#dialog-image').srcset = `${product.previewSmall} 320w, ${product.previewMedium} 640w, ${product.preview} 960w`;
+  $('#dialog-image').sizes = '(max-width:650px) 90vw, 50vw';
+  $('#dialog-image').alt = product.title;
   if ($('#dialog-image').complete) updateDetailPreview();
   $('#dialog-note').textContent = `Original PNG · ${product.width} × ${product.height} px · 3:4`;
   $('#print-note').textContent = product.printFile ? 'A larger print master is included. Pick it from the file menu.' : printGuide(product);
