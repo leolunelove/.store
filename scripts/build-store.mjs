@@ -13,7 +13,7 @@ let originalBytes = 0, previewBytes = 0;
 for (const product of PRODUCTS) {
   const original = path.join(docs, 'downloads', product.file);
   originalBytes += (await stat(original)).size;
-  for (const [width, file] of [[320, product.previewSmall], [960, product.preview]]) {
+  for (const [width, file] of [[320, product.previewSmall], [640, product.previewMedium], [960, product.preview]]) {
     const target = path.join(docs, file);
     // Mechanical thumbnail export; original artwork files are never modified.
     if (process.argv.includes('--previews')) execFileSync('/usr/bin/sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '78', '--resampleWidth', String(width), original, '--out', target], {stdio:'pipe'});
