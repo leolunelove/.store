@@ -2,8 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {PRODUCTS} from '../docs/catalog.js';
-import {filterProducts,adjacentArtwork} from '../docs/store-utils.js';
+import {filterProducts,adjacentArtwork,printSize} from '../docs/store-utils.js';
 import {createTracker} from '../docs/analytics.js';
+test('compact print label uses native file dimensions',()=>{
+ assert.equal(printSize({width:1080,height:1440}),'Small print: 9 × 12 cm');
+});
+test('viewer recovery, gesture hint and accessibility controls are present',async()=>{
+ const html=await readFile(new URL('../scripts/store-template.html',import.meta.url),'utf8');
+ const css=await readFile(new URL('../docs/experience.css',import.meta.url),'utf8');
+ for(const id of ['viewer-retry','viewer-swipe-hint']) assert.ok(html.includes(`id="${id}"`));
+ assert.match(css,/scroll-behavior:auto/);assert.match(css,/outline:2px solid #eee/);
+ const app=await readFile(new URL('../docs/app.js',import.meta.url),'utf8');assert.ok(!app.includes('<strong>Free download'));
+});
 test('download comes before secondary tools and browsing, with one share control',async()=>{
  const html=await readFile(new URL('../scripts/store-template.html',import.meta.url),'utf8');
  assert.ok(html.indexOf('id="purchase-form"')<html.indexOf('class="artwork-tools"'));
