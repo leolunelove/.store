@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- PAGE_META -->
+  <link rel="stylesheet" href="gallery.css?v=8">
+  <link rel="stylesheet" href="experience.css?v=16">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head>
+<body>
+  <a class="skip-link" href="#work">Skip to artwork</a>
+  <div class="store-shell">
+    <header class="site-header">
+      <a class="wordmark" href="./" aria-label="Leo Lune store"><img src="leo-mark.png" alt="Leo Lune" width="61" height="30"><span>Store</span></a>
+      <div class="header-actions">
+        <a href="https://www.leolune.com" target="_blank" rel="noopener"><span class="arrow-circle" aria-hidden="true">↗</span> <span class="portfolio-label">Portfolio</span></a>
+      </div>
+    </header>
+    <aside class="sidebar" aria-label="Collection filters">
+      <p class="eyebrow">ARTWORK / <span id="catalog-count">12 PIECES</span></p>
+      <div class="categories">
+        <button class="active" data-filter="all" aria-pressed="true"><span>All work <small data-count="all">12</small></span></button>
+        <button data-filter="type" aria-pressed="false"><span>Type-led <small data-count="type">07</small></span></button>
+        <button data-filter="photo" aria-pressed="false"><span>Photo-led <small data-count="photo">05</small></span></button>
+      </div>
+      <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Title, colour, subject…" aria-label="Search by title, colour or subject"></label>
+      <p class="sidebar-footer">GI / GIBRALTAR<br>PNG files. No sign-up.</p>
+    </aside>
+    <main id="top">
+      <section class="hero">
+        <p class="eyebrow">LEO LUNE / STORE</p>
+        <h1>Stuff I've made.</h1>
+        <div class="hero-bottom"><p class="intro">Download it. Print it. Put it up.<span class="hero-support-copy">Free to download. <a id="hero-support" target="_blank" rel="noopener noreferrer" hidden>Chip in if you want <span aria-hidden="true">↗</span></a></span></p></div>
+      </section>
+      <section class="collection" id="work" aria-labelledby="collection-heading">
+        <div class="section-heading">
+          <h2 id="collection-heading" aria-live="polite">All work</h2>
+          <div class="view-controls">
+            <select id="sort" aria-label="Sort artwork"><option value="curated">Featured</option><option value="title">Title A–Z</option></select>
+            <button data-columns="3" aria-label="Three-column grid" aria-pressed="true">⊞</button><button data-columns="2" aria-label="Two-column grid" aria-pressed="false">▥</button>
+          </div>
+        </div>
+        <div class="art-grid" id="art-grid"></div>
+        <div class="empty-state" id="empty-state" hidden><p id="empty-message"></p><button id="reset-filters">Reset filters</button></div>
+      </section>
+      <!-- NO_SCRIPT -->
+    </main>
+  </div>
+  <footer><span>Made by Leo Lune.</span><button type="button" data-ask-leo>Ask Leo ↗</button><span>© <span id="year"></span></span></footer>
+
+  <dialog class="purchase-dialog" id="purchase-dialog" aria-labelledby="dialog-title">
+    <button class="close-button" id="close-artwork" type="button" aria-label="Close artwork">×</button>
+    <button class="dialog-art" id="open-viewer" type="button" aria-label="View artwork full screen">
+      <img id="dialog-image" alt="" width="600" height="800"><span class="image-status" id="detail-image-status" role="status">Loading preview…</span><span class="zoom-hint">View full size ↗</span>
+    </button>
+    <div class="dialog-content">
+      <a class="back-to-work" href="./">← All work</a>
+      <p class="eyebrow">DIGITAL DOWNLOAD</p>
+      <h2 id="dialog-title"></h2>
+      <p class="dialog-note" id="dialog-note"></p>
+      <label class="file-choice" id="file-choice" hidden>File <select id="file-format" aria-label="Download file format"></select></label>
+      <form id="purchase-form">
+        <fieldset id="amount-fieldset">
+          <legend>Download free. Or chip in.</legend>
+          <div class="amounts" role="group" aria-label="Choose an amount" aria-describedby="support-copy">
+            <button type="button" data-amount="0">Free</button><button type="button" data-amount="300">£3</button><button type="button" data-amount="500">£5</button><button type="button" data-amount="1000">£10</button><button type="button" data-amount="custom">Other</button>
+          </div>
+          <label class="custom-amount" hidden><span>Amount in pounds · £1–£500</span><span class="currency-input"><span>£</span><input id="custom-amount" type="number" min="1" max="500" step="0.01" inputmode="decimal"></span></label>
+        </fieldset>
+        <p class="support-copy" id="support-copy">Free. Pay what it's worth to you.</p>
+        <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+        <div class="download-action"><div class="download-followup" id="download-followup" tabindex="-1" role="status" hidden><h3>Enjoy it.</h3><p>Your download has been requested.</p></div><button class="primary-button" id="checkout-button" type="submit">Download PNG</button><a class="support-link" id="support-link" target="_blank" rel="noopener noreferrer" hidden>Support the work ↗</a><button class="keep-browsing" id="keep-browsing" type="button" hidden>Keep browsing ↗</button><small id="checkout-note"></small></div>
+      </form>
+      <div class="artwork-tools"><button id="share-artwork" type="button">Share ↗</button><a id="artwork-permalink" href="./">Artwork page ↗</a></div>
+      <input id="share-url" aria-label="Artwork link — select and copy" readonly hidden>
+      <details class="usage-note"><summary>Use &amp; printing <span aria-hidden="true">+</span></summary><p>Print it for personal use.</p><p id="print-note"></p><button type="button" data-ask-leo>Want a print? Something else? Ask Leo ↗</button></details>
+      <nav class="artwork-navigation" aria-label="Browse artwork"><button id="artwork-previous" type="button" aria-label="Previous artwork">← Previous</button><span id="artwork-position"></span><button id="artwork-next" type="button" aria-label="Next artwork">Next →</button></nav>
+    </div>
+  </dialog>
+
+  <dialog class="art-viewer" id="art-viewer" aria-labelledby="viewer-title">
+    <div class="viewer-toolbar"><h2 id="viewer-title"></h2><div><button id="viewer-zoom" aria-pressed="false">Zoom in</button><button id="close-viewer" aria-label="Close full-screen view">×</button></div></div>
+    <div class="viewer-canvas" id="viewer-canvas"><img id="viewer-image" alt="" width="1080" height="1440"><p id="viewer-status" role="status">Loading original…</p></div>
+    <div class="viewer-navigation"><button id="viewer-previous" aria-label="Previous artwork">← Previous</button><span id="viewer-position"></span><button id="viewer-next" aria-label="Next artwork">Next →</button></div>
+  </dialog>
+  <dialog class="contact-dialog" id="contact-dialog" aria-labelledby="contact-title">
+    <button class="close-button" id="close-contact" type="button" aria-label="Close enquiry">×</button>
+    <h2 id="contact-title">Ask Leo.</h2><p>Prints, projects, other uses. What's on your mind?</p>
+    <form id="contact-form">
+      <label>Artwork<input id="contact-artwork" name="artwork" readonly></label>
+      <label>Your email<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
+      <label>Message<textarea name="message" rows="4" minlength="10" maxlength="3000" required></textarea></label>
+      <label class="contact-trap" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off"></label>
+      <p class="contact-privacy">Your email and message are sent to Leo so he can reply. No mailing list.</p>
+      <button class="primary-button" id="send-contact" type="submit">Send to Leo ↗</button>
+      <p id="contact-status" role="status" aria-live="polite"></p>
+    </form>
+    <div class="contact-email"><span>Or email directly</span><input id="contact-email" aria-label="Leo's email address" value="leolunedesign@gmail.com" readonly><button id="copy-email" type="button">Copy email ↗</button></div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="config.js?v=16"></script><script type="module" src="app.js?v=16"></script>
+</body>
+</html>
