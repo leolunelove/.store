@@ -93,6 +93,10 @@ function renderCollection() {
   $('#collection-heading').innerHTML = `${label} <span>${String(visible.length).padStart(2,'0')}</span>`;
   $('#empty-state').hidden = visible.length > 0;
   $('#empty-message').textContent = 'No matches. Try another filter.';
+  const query = $('#search').value.trim();
+  $('#search-feedback').textContent = query ? `${visible.length} ${visible.length === 1 ? 'piece' : 'pieces'} for “${query}” in ${label.toLowerCase()}.` : '';
+  $('#clear-search').hidden = !query;
+  if (query && !visible.length) $('#empty-message').textContent = `Nothing for “${query}” in ${label.toLowerCase()}. Clear the search or try another word.`;
   $('#art-grid').innerHTML = visible.map((p, index) => `
     <article class="art-card">
       <a class="art-open" href="${p.page}" data-product="${p.id}" aria-label="View ${p.title}">
@@ -112,6 +116,7 @@ document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListen
   renderCollection();
 }));
 $('#search').addEventListener('input', renderCollection);
+$('#clear-search').addEventListener('click',()=>{ $('#search').value=''; renderCollection(); $('#search').focus(); });
 $('#sort').addEventListener('change', renderCollection);
 $('#reset-filters').addEventListener('click',()=>{ $('#search').value = ''; $('[data-filter="all"]').click(); });
 document.querySelectorAll('[data-columns]').forEach(button=>button.addEventListener('click',()=>{
@@ -147,6 +152,7 @@ function openArtwork(id, updateHistory = false) {
   $('#dialog-image').alt = product.title;
   if ($('#dialog-image').complete) updateDetailPreview();
   $('#dialog-note').textContent = `Original PNG · ${product.width} × ${product.height} px · 3:4`;
+  $('#print-size').textContent = printGuide(product);
   $('#print-note').textContent = product.printFile ? 'A larger print master is included. Pick it from the file menu.' : printGuide(product);
   $('#artwork-permalink').href = pageUrl(product);
   $('#file-format').innerHTML = fileOptions(product).map(f=>`<option value="${f.id}">${f.label}</option>`).join('');
@@ -209,7 +215,7 @@ $('#viewer-zoom').addEventListener('click',()=>{
 function moveViewer(delta) {
   const next = adjacentArtwork(browsingProducts, selectedProduct.id, delta);
   if (!next || browsingProducts.length < 2) return;
-  if (directEntry) { location.assign(pageUrl(next).href); return; }
+  if (directEntry && !viewer.open) { location.assign(pageUrl(next).href); return; }
   openArtwork(next.id); history.replaceState(history.state, '', pageUrl(selectedProduct));
   if (viewer.open) loadViewer();
 }
@@ -221,6 +227,17 @@ viewer.addEventListener('keydown',event=>{
   if (event.key === 'ArrowLeft') { event.preventDefault(); moveViewer(-1); }
   if (event.key === 'ArrowRight') { event.preventDefault(); moveViewer(1); }
 });
+let swipeStart = null;
+$('#viewer-canvas').addEventListener('touchstart',event=>{
+  swipeStart = event.touches.length === 1 && !$('#viewer-canvas').classList.contains('zoomed') ? {x:event.touches[0].clientX,y:event.touches[0].clientY,time:Date.now()} : null;
+},{passive:true});
+$('#viewer-canvas').addEventListener('touchcancel',()=>{ swipeStart=null; },{passive:true});
+$('#viewer-canvas').addEventListener('touchend',event=>{
+  const start=swipeStart; swipeStart=null;
+  if (!start || event.touches.length || event.changedTouches.length!==1 || $('#viewer-canvas').classList.contains('zoomed')) return;
+  const dx=event.changedTouches[0].clientX-start.x, dy=event.changedTouches[0].clientY-start.y;
+  if (Math.abs(dx)>=70 && Math.abs(dx)>Math.abs(dy)*2 && Date.now()-start.time<800) moveViewer(dx<0?1:-1);
+},{passive:true});
 function chooseAmount(value) {
   selectedAmount = value === 'custom' ? null : Number(value);
   $('.custom-amount').hidden = value !== 'custom'; $('#custom-amount').required = value === 'custom'; $('#form-status').textContent = '';
@@ -244,6 +261,8 @@ form.addEventListener('submit',async event=>{
   if (pennies === 0) {
     track('download_click',selectedProduct.id);
     triggerDownload(selectedFile());
+    const recovery=$('#download-again'), file=selectedFile();
+    recovery.href=new URL(file.path,rootUrl); recovery.download=file.file || decodeURIComponent(file.path.split('/').pop());
     $('#download-followup').hidden = false;
     $('#keep-browsing').hidden = false;
     $('#checkout-button').textContent = 'Download again';
