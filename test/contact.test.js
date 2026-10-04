@@ -2,6 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import worker, {validateEnquiry} from '../worker/contact.js';
 const data={email:'visitor@example.com',message:'Can I ask about a print?',artwork:'Fingertips',requestId:'11111111-1111-4111-8111-111111111111'};
+test('receiver rejects JSON null without crashing',async()=>{
+  const request=new Request('https://receiver.example/contact',{method:'POST',headers:{Origin:'https://leolune.store','Content-Type':'application/json'},body:'null'});
+  assert.equal((await worker.fetch(request,{RESEND_API_KEY:'placeholder',CONTACT_RATE_LIMIT:{limit:async()=>({success:true})}})).status,400);
+});
 test('enquiries reject invalid addresses, oversized messages and retry IDs',()=>{
   assert.deepEqual(validateEnquiry(data),data);
   for (const change of [{email:'invalid'},{email:'a@example.com\nBcc: bad@example.com'},{message:'short'},{message:'x'.repeat(3001)},{requestId:'bad'},{artwork:''}]) assert.equal(validateEnquiry({...data,...change}),null);
