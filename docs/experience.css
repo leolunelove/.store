@@ -79,6 +79,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible,
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.art-stage img,.support-link,.toast{transition:none}.art-open:hover img{transform:none}}
 .related-artwork{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.artwork-page .dialog-art{align-self:start}
 .dialog-content .related-artwork h2{font-size:13px;line-height:1.5;letter-spacing:0;font-weight:400;margin:0 0 12px}
 #related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 #related-grid a{display:block;min-width:0;font-size:11px;line-height:1.4;color:#ccc}
