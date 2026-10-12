@@ -1,5 +1,6 @@
-import { PRODUCTS, FEATURED_PRODUCTS } from './catalog.js?v=17';
-import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, printSize, shareArtwork, adjacentArtwork } from './store-utils.js?v=19';
+import { PRODUCTS, FEATURED_PRODUCTS, RELATED_IDS } from './catalog.js?v=20';
+import { FILE_SIZES } from './file-sizes.js?v=20';
+import { amountInPennies, fileOptions, filterProducts, liveSupportLink, printGuide, printSize, downloadSize, shareArtwork, adjacentArtwork } from './store-utils.js?v=20';
 import { createTracker } from './analytics.js?v=12';
 const $ = selector => document.querySelector(selector);
 const apiBaseUrl = String(window.LEO_LUNE_CONFIG?.apiBaseUrl || '').replace(/\/$/, '');
@@ -151,9 +152,17 @@ function openArtwork(id, updateHistory = false) {
   $('#dialog-image').sizes = '(max-width:650px) 90vw, 50vw';
   $('#dialog-image').alt = product.title;
   if ($('#dialog-image').complete) updateDetailPreview();
-  $('#dialog-note').textContent = `Original PNG · ${product.width} × ${product.height} px · 3:4`;
+  $('#dialog-note').textContent = `PNG · ${product.width} × ${product.height} px · ${downloadSize(FILE_SIZES[product.id])}`;
   $('#print-size').textContent = printSize(product);
   $('#print-note').textContent = product.printFile ? 'A larger print master is included. Pick it from the file menu.' : printGuide(product);
+  const related = (RELATED_IDS[id] || []).map(relatedId=>PRODUCTS.find(p=>p.id===relatedId)).filter(Boolean);
+  $('#related-grid').replaceChildren(...related.map(p=>{
+    const link=document.createElement('a'), image=document.createElement('img'), title=document.createElement('span');
+    link.href=pageUrl(p); link.setAttribute('aria-label',`View ${p.title}`);
+    image.src=p.previewSmall; image.alt=''; image.width=p.width; image.height=p.height; image.loading='lazy'; image.decoding='async';
+    title.textContent=p.title; link.append(image,title); return link;
+  }));
+  $('.related-artwork').hidden=!related.length;
   $('#artwork-permalink').href = pageUrl(product);
   $('#file-format').innerHTML = fileOptions(product).map(f=>`<option value="${f.id}">${f.label}</option>`).join('');
   $('#file-choice').hidden = fileOptions(product).length < 2;

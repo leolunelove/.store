@@ -43,8 +43,23 @@ export const PRODUCTS = [
   number: String(index + 1).padStart(2, '0')
 }));
 
-// Change this list to rotate the opening row without renaming files or links.
-export const FEATURED_IDS = ['fingertips', 'im-half-crazy', 'who-made-you-king'];
+// Two deliberate rows: cool / orange / dark, then yellow / teal / red.
+export const FEATURED_IDS = ['fingertips', 'im-half-crazy', 'who-made-you-king', 'smile', 'xtcy', 'high-and-lows'];
+// Fixed editorial pairings. Keep these independent of search or visitor activity.
+export const RELATED_IDS = {
+  'fingertips': ['sensory', 'selfie', 'xtcy'],
+  'im-half-crazy': ['i-want-to-beat-somebody-up', 'high-and-lows', 'why'],
+  'who-made-you-king': ['selfie', 'fingertips', 'famous'],
+  'smile': ['why', 'smoking-crack-is-bad', 'famous'],
+  'xtcy': ['selfie', 'fingertips', 'sensory'],
+  'high-and-lows': ['i-want-to-beat-somebody-up', 'im-half-crazy', 'smoking-crack-is-bad'],
+  'why': ['smile', 'im-half-crazy', 'smoking-crack-is-bad'],
+  'famous': ['xtcy', 'smile', 'who-made-you-king'],
+  'sensory': ['fingertips', 'xtcy', 'selfie'],
+  'smoking-crack-is-bad': ['smile', 'high-and-lows', 'why'],
+  'i-want-to-beat-somebody-up': ['high-and-lows', 'im-half-crazy', 'smoking-crack-is-bad'],
+  'selfie': ['xtcy', 'fingertips', 'who-made-you-king']
+};
 export const FEATURED_PRODUCTS = [...PRODUCTS].sort((a, b) => {
   const rank = id => FEATURED_IDS.includes(id) ? FEATURED_IDS.indexOf(id) : FEATURED_IDS.length;
   return rank(a.id) - rank(b.id);

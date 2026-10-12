@@ -11,6 +11,9 @@ export function printGuide(product) {
 export function printSize(product) {
   return `Small print: ${Math.round(product.width / 300 * 2.54)} × ${Math.round(product.height / 300 * 2.54)} cm`;
 }
+export function downloadSize(bytes) {
+  return Number.isSafeInteger(bytes) && bytes > 0 ? `${(bytes / 1000000).toFixed(1)} MB` : '';
+}
 export async function shareArtwork(data, browserNavigator) {
   if (!browserNavigator.share) return 'unavailable';
   try { await browserNavigator.share(data); return 'shared'; }
