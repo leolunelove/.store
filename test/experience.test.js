@@ -23,7 +23,7 @@ test('all generated pages include optional support and download follow-up contro
     const html=await readFile(new URL(`../docs/${page}`,import.meta.url),'utf8');
     for(const id of ['hero-support','share-artwork','download-followup','keep-browsing']) assert.ok(html.includes(`id="${id}"`));
     for (const id of ['print-size','download-again','clear-search','search-feedback']) assert.ok(html.includes(`id="${id}"`));
-    assert.ok(html.includes('app.js?v=19'));
+    assert.ok(html.includes('app.js?v=20'));
   }
 });
 test('support checkout permits only live HTTPS Stripe payment links',()=>{
@@ -31,7 +31,7 @@ test('support checkout permits only live HTTPS Stripe payment links',()=>{
   for (const url of [undefined,'','javascript:alert(1)','https://evil.example/link','https://buy.stripe.com.evil.example/link','http://buy.stripe.com/link','https://buy.stripe.com/test_example','https://secret@buy.stripe.com/link']) assert.equal(liveSupportLink(url),'');
 });
 test('featured row is deliberate and all artwork is retained',()=>{
-  assert.deepEqual(FEATURED_PRODUCTS.slice(0,3).map(p=>p.id), FEATURED_IDS);
+  assert.deepEqual(FEATURED_PRODUCTS.slice(0,FEATURED_IDS.length).map(p=>p.id), FEATURED_IDS);
   assert.equal(new Set(FEATURED_PRODUCTS.map(p=>p.id)).size,12);
 });
 test('category and search filters compose without mutating catalogue',()=>{
