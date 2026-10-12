@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { PRODUCTS, FEATURED_PRODUCTS } from '../docs/catalog.js';
+import { downloadSize, printSize } from '../docs/store-utils.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const docs = path.join(root, 'docs');
@@ -10,9 +11,11 @@ const origin = 'https://leolune.store/';
 const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'}[c]));
 const template = await readFile(path.join(root, 'scripts/store-template.html'), 'utf8');
 let originalBytes = 0, previewBytes = 0;
+const fileSizes = {};
 for (const product of PRODUCTS) {
   const original = path.join(docs, 'downloads', product.file);
-  originalBytes += (await stat(original)).size;
+  fileSizes[product.id] = (await stat(original)).size;
+  originalBytes += fileSizes[product.id];
   for (const [width, file] of [[320, product.previewSmall], [640, product.previewMedium], [960, product.preview]]) {
     const target = path.join(docs, file);
     // Mechanical thumbnail export; original artwork files are never modified.
@@ -20,6 +23,7 @@ for (const product of PRODUCTS) {
     previewBytes += (await stat(target)).size;
   }
 }
+await writeFile(path.join(docs, 'file-sizes.js'), `// Generated from the original downloads by build-store.mjs.\nexport const FILE_SIZES = ${JSON.stringify(fileSizes, null, 2)};\n`);
 function page(product) {
   const title = product ? `${product.title} — Leo Lune` : 'Leo Lune — Store';
   const description = product ? `${product.title} by Leo Lune. Free original PNG download, ${product.width} × ${product.height} px. No sign-up.` : "Stuff I've made. Free artwork downloads by Leo Lune. Download it. Print it. Put it up.";
@@ -41,6 +45,8 @@ function page(product) {
     const dialog = html.match(/  <dialog class="purchase-dialog"[\s\S]*?<\/dialog>/)[0];
     const detail = dialog.replace('id="purchase-dialog"', 'id="purchase-dialog" open')
       .replace('<h2 id="dialog-title"></h2>', `<h1 id="dialog-title">${escape(product.title)}</h1>`)
+      .replace('<p class="dialog-note" id="dialog-note"></p>', `<p class="dialog-note" id="dialog-note">PNG · ${product.width} × ${product.height} px · ${downloadSize(fileSizes[product.id])}</p>`)
+      .replace('<p class="dialog-note print-size" id="print-size"></p>', `<p class="dialog-note print-size" id="print-size">${printSize(product)}</p>`)
       .replace('<img id="dialog-image" alt=""', `<img id="dialog-image" src="${product.preview}" alt="${escape(product.title)}"`);
     html = html.replace(dialog, '').replace('<!-- NO_SCRIPT_UNUSED -->', '').replace('</main>', `${detail}\n    </main>`);
   }
