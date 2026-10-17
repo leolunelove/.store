@@ -1,87 +1,110 @@
-# Leo Lune store
+<p align="center">
+  <img src="docs/apple-touch-icon.png" width="80" height="80" alt="Leo Lune mark">
+</p>
 
-The live storefront is **https://leolune.store**, hosted by GitHub Pages from `main /docs`.
-Optional support uses a live Stripe Payment Link in `docs/config.js`: customer-chosen GBP amounts (£1–£500, £5 suggested). Downloads remain unconditional and free; Stripe hosts checkout and payment records. Only a public payment URL is shipped to GitHub Pages, never API keys.
-The alternative Vercel payment backend is **not connected** and is not production-complete. Add and verify a signed, idempotent webhook handler before enabling any automated paid fulfillment. Returning from the Payment Link does not prove payment and triggers no paid fulfillment.
+<h1 align="center">Leo Lune Store</h1>
 
-## What is included
+<p align="center">Download it. Print it. Put it up.</p>
 
-- Twelve original 1080×1440 PNG files, preserved unchanged in `docs/downloads/`.
-- Responsive 320px, 640px and 960px JPEG previews; the browser selects an appropriate size. Original files load only for full-size viewing or downloads. Originals are not upscaled.
-- Individual artwork HTML pages with canonical URLs, Open Graph/Twitter metadata, a sitemap and a no-JavaScript download fallback.
-- Full-screen original viewer, zoom, keyboard navigation and meaningful category filters. No bookmarking or shareable filter URLs.
-- Free-first downloads with a separate optional “Support the work” link. The custom API remains disabled.
-- A server-controlled Stripe Checkout flow with strict product/file validation, GBP amount bounds, retry idempotency and payment verification.
+<p align="center">
+  <a href="https://leolune.store/">Open the store</a> ·
+  <a href="https://www.leolune.com/">Portfolio</a> ·
+  <a href="#run-locally">Development & deployment</a>
+</p>
 
-## Edit artwork and regenerate pages
+## Find something you like
 
-`docs/catalog.js` is the source for titles, categories, original files and the featured opening row (`FEATURED_IDS`).
-Change the reusable page markup in `scripts/store-template.html`; don't edit generated `docs/index.html` or the individual artwork HTML pages directly.
+- **Browse the work.** Twelve artworks, with a curated opening six. Search by title, colour or subject, filter photo-led and type-led pieces, and choose a grid that suits you.
+- **Take a closer look.** Open any artwork for the full-size view, zoom in, or move between pieces with the keyboard and touch controls.
+- **Download it.** Get the original PNG straight away. Each artwork shows its dimensions, actual file size and a guide to small-print sizing.
+- **Pay what it's worth to you.** Downloads are free. The separate **Support the work** link opens Stripe, where you choose an amount.
+- **Keep looking.** Three selected related pieces sit on each artwork page. Returning to the gallery keeps your search and filters.
+- **Send it on.** Every artwork has its own link and sharing preview.
+
+## Get started
+
+1. [Open the store](https://leolune.store/) and choose a piece.
+2. Select **Download PNG** to save the original file.
+3. Choose **Support the work** if you want to chip in. Payment is optional and separate from the download.
+4. Print it for personal use, or keep browsing for something else.
+
+## The artwork
+
+The current collection contains twelve original **1080 × 1440 px PNGs**. Downloads preserve the supplied files unchanged. The gallery uses smaller JPEG previews so browsing doesn't load every original.
+
+These files suit screens and small personal prints. Higher-resolution print masters haven't been supplied; the store doesn't upscale the originals or advertise them as large-format print files.
+
+The opening six are **Fingertips**, **I'm Half Crazy**, **Who Made You King**, **Smile**, **XTCY** and **High and Lows**.
+
+## Run locally
+
+Use Node.js 20 or later. GitHub Actions uses Node.js 22.
 
 ```sh
+git clone https://github.com/leolunelove/.store.git
+cd .store
 npm run build:pages
-npm test
-```
-
-`npm run check:pages` also checks all artwork files, preview paths, PNG dimensions, local page links and accidental private keys in public files. The Pages workflow runs this validation before deploying; enable **GitHub Actions** as the repository Pages source. Failed checks stop publication. Mobile layout is checked with a browser viewport; a physical-phone payment-wallet check is still a separate manual check.
-
-On macOS, export the lightweight previews from unchanged originals:
-
-```sh
-npm run build:previews
-```
-
-The preview command uses macOS `sips`. Normal page generation only needs Node.js 20+; previews are checked in so the Vercel build also works on Linux.
-
-The featured row is Fingertips, I'm Half Crazy and Who Made You King. Change `FEATURED_IDS` to rotate it. Counts, ordering and navigation update from the catalogue.
-
-## Larger print files
-
-Higher-resolution masters have not been supplied. The current files are not advertised as large-format print exports and are never upscaled.
-When a real print master is available, add `printFile` to that product with `{ path, file, width, height }` (relative to `docs/`). The file menu and server allowlist pick it up automatically. Rebuild, test and deploy both frontend and backend after catalogue changes.
-
-## Local preview
-
-```sh
 python3 -m http.server 4173 --directory docs
 ```
 
-Open `http://localhost:4173/`. For local API testing, `npm install` then `npm run dev`, set server environment variables and point `docs/config.js` at that local API origin temporarily. Never commit private environment files.
+Open [localhost:4173](http://localhost:4173/). The static storefront build needs no package installation or API keys.
 
-## Connect Stripe on Vercel
+Run `npm run check:pages` before publishing. It regenerates the pages, runs the tests, and checks artwork dimensions, preview files, local links and accidental private keys in public files. Browser checks cover responsive layouts; payment wallets still need checking on a compatible physical device.
 
-1. Import **leolunelove/.store** into Vercel. Use framework **Other**. `vercel.json` supplies the build command, static output directory and Node function settings.
-2. Set environment variables directly in Vercel's private project settings:
-   - `STRIPE_SECRET_KEY`: a Stripe **test** secret key first. Never put it in `docs/` or chat.
-   - `SITE_URL`: `https://leolune.store`
-   - `PAYMENTS_ENABLED`: `true` for the test deployment after the key is configured; `false` disables payment requests immediately after redeploy.
-3. Deploy the API. Set `apiBaseUrl` in `docs/config.js` to that Vercel origin, with no trailing slash, then publish the Pages change.
-4. Complete test-mode payment, cancellation, refresh/retry and free-download checks. Verify the charged amount and matching product in Stripe. No real payment has been tested in this project yet.
-5. Only after test-mode checks and Stripe account activation, replace the private key with a live key and redeploy. Verify Apple Pay on an eligible device; don't promise it on every browser.
+## Edit the collection
 
-Hosted Stripe Checkout keeps card entry outside the store. Card payment methods can include Apple Pay on supported devices when enabled for the Stripe account. No Stripe secret or publishable key is required in the frontend.
+Edit [docs/catalog.js](docs/catalog.js) for artwork titles, files, categories, search tags, the featured order (`FEATURED_IDS`) and related pieces (`RELATED_IDS`). Edit [scripts/store-template.html](scripts/store-template.html) for shared page markup.
 
-## Security and operations
+```sh
+npm run build:pages
+npm run check:pages
+```
 
-## Ask Leo contact receiver
+The build generates the gallery, individual artwork pages, sitemap and file-size metadata. Make changes in the catalogue and template rather than editing generated HTML directly.
 
-The on-site enquiry dialog includes a copyable email address. `contactEndpoint` remains empty until the Worker is deployed and email delivery tested; the form never reports a false success.
+On macOS, run `npm run build:previews` to regenerate the 320, 640 and 960 px JPEG previews using `sips`. Previews are checked into the repository, so normal builds also work on Linux. Run `npm install` before `npm run build:social` when regenerating social sharing images.
 
-Deploy `worker/contact.js` with `wrangler.jsonc` to Cloudflare Workers. Set `RESEND_API_KEY` as a private Worker secret, restricted to sending from the verified `leolune.fun` domain. No secret is committed. The recipient is fixed to Leo's contact address; visitors become Reply-To, not From. The receiver validates input, restricts the website origin, checks a honeypot and limits each IP to three requests per minute. Retries reuse a Resend idempotency key. Personal message bodies are not logged. There is no marketing subscription or visitor auto-reply.
+When a genuine print master is available, add its `printFile` entry to the catalogue with `{ path, file, width, height }`, relative to `docs/`, then rebuild and check the pages. If using the optional payment API, deploy its updated catalogue too.
 
-After a real delivery check, set `docs/config.js` `contactEndpoint` to `https://<worker-host>/contact` and publish Pages. This contact backend is separate from the unconnected payment API.
+## Repository guide
 
-## Payment security
+| Path | Purpose |
+| --- | --- |
+| [docs/](docs/) | Published storefront, styles, browser code and generated artwork pages |
+| [docs/catalog.js](docs/catalog.js) | Artwork catalogue, featured order and related selections |
+| [docs/downloads/](docs/downloads/) | Unchanged original PNG downloads |
+| [docs/config.js](docs/config.js) | Public support link and optional service endpoints |
+| [scripts/](scripts/) | Page generation, image previews, sharing images and publication checks |
+| [test/](test/) | Storefront, catalogue, payment and contact checks |
+| [api/](api/) & [server/](server/) | Optional server-side Checkout implementation; not connected to the live store |
+| [worker/](worker/) | Optional Ask Leo email receiver; not connected to the live store |
+| [.github/workflows/](.github/workflows/) | Checks and GitHub Pages publishing |
 
-- API origins, product IDs, formats and amounts are validated server-side. Support amounts are whole pennies from £1 to £500.
-- Checkout Session creation uses Stripe idempotency keys for retries. Success-page URLs alone never establish payment.
-- Verification checks session completion, paid status, currency, expected amount, store marker, product and file against the server catalogue.
-- API responses are not cached and do not expose Stripe secrets or customer details. Errors returned to the browser are generic.
-- Every artwork is intentionally free; payment verification is not a paywall. Don't reuse this design for paid-only files without protected file delivery and webhook-backed fulfilment.
-- Before a broad paid launch, configure abuse/rate limits at the hosting layer, confirm account/payment settings, and review the usage note with the artist.
+GitHub Pages hosts [leolune.store](https://leolune.store/). The **Check and publish store** workflow builds and validates `docs/`, then publishes it when changes reach `main`. Failed checks stop deployment. Set the repository's Pages source to **GitHub Actions**; [docs/CNAME](docs/CNAME) supplies the custom domain.
 
-## References
+## Built with
 
-- [Stripe hosted Checkout](https://docs.stripe.com/payments/checkout/how-checkout-works)
-- [Create a Checkout Session](https://docs.stripe.com/api/checkout/sessions/create)
-- [Stripe Apple Pay](https://docs.stripe.com/apple-pay)
+HTML, CSS and JavaScript, with Node.js scripts generating the static pages. Artwork pages include canonical URLs, social sharing metadata and a download fallback for browsers without JavaScript.
+
+Optional support uses a public Stripe Payment Link. Stripe hosts checkout and payment records; no Stripe API keys are needed in the frontend. Downloads remain available whether or not someone pays.
+
+Ask Leo currently provides a copyable email address. Sending through the form stays disabled until its private email service is configured and delivery has been tested.
+
+<details>
+<summary>Optional services and setup notes</summary>
+
+### Payment API
+
+The Vercel Checkout backend is included for further development but is **not connected** to the live store. It validates products, files, GBP amounts and payment status server-side, and uses idempotency keys for checkout retries. Before enabling automated paid fulfilment, add and verify a signed, idempotent webhook handler and protected delivery for any paid-only files. A payment return URL is not proof of payment.
+
+To develop it, run `npm install` and `npm run dev`. For a Vercel deployment, import this repository with framework **Other**; [vercel.json](vercel.json) defines the build and function settings. Configure `STRIPE_SECRET_KEY`, `SITE_URL` and `PAYMENTS_ENABLED` in private hosting settings. Start with a test key and leave payments disabled until configuration is ready.
+
+Point `apiBaseUrl` in [docs/config.js](docs/config.js) at the deployed API origin only after configuration. Test payment, cancellation, retries and free downloads before changing to live credentials. Verify Apple Pay on an eligible device. Never commit private keys or environment files.
+
+### Contact receiver
+
+[worker/contact.js](worker/contact.js) and [wrangler.jsonc](wrangler.jsonc) provide an optional Cloudflare Worker receiver. Configure `RESEND_API_KEY` as a private Worker secret for the verified sending domain. The receiver fixes the recipient, validates messages, restricts the website origin, checks a honeypot and rate-limits requests. Visitor email addresses become Reply-To; message bodies aren't logged.
+
+Keep `contactEndpoint` empty until a real delivery check succeeds. Then set it to the Worker's `/contact` URL and publish the configuration. This service is independent of the payment API.
+
+</details>
